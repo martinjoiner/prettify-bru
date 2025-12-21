@@ -1,11 +1,18 @@
 #!/usr/bin/env node
-const yargs = require('yargs')
-	.usage(`
+
+import yargs from 'yargs';
+import {go} from './index.js';
+
+const argv = yargs(process.argv).usage(`
 Usage: $0 [-d] path
 
 Running the command with no arguments will modify all files
 
 `).options({
+    d: {
+      type: 'boolean',
+      default: false
+    },
     path: {
       default: '.',
     },
@@ -18,18 +25,11 @@ Running the command with no arguments will modify all files
   .help()
   .alias('h', 'help')
   .alias('d', 'check')
-  .alias('d', 'dry-run');
-
-const argv = yargs.argv;
+  .alias('d', 'dry-run')
+  .parse();
 
 if (argv.h) {
   yargs.showHelp();
 } else {
   go(argv.d, argv.path);
-}
-
-function go(argv) {
-  const module = require('./index');
-
-  module.go(argv.d, argv.path)
 }

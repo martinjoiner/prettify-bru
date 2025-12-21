@@ -1,6 +1,6 @@
 {
   "name": "prettify-bru",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Prettifies JSON and JavaScript blocks in Bruno .bru files",
   "keywords": [
     "bruno",
@@ -22,13 +22,17 @@
   "license": "GPL-3.0-or-later",
   "author": "Martin Joiner (http://martinjoiner.co.uk)",
   "type": "module",
+  "files": [
+    "index.js",
+    "cli.js",
+    "src/"
+  ],
   "bin": {
     "prettify-bru": "./cli.js"
   },
   "dependencies": {
     "yargs": "15.4.1"
   },
-  "main": "./index",
   "scripts": {
     "test": "test"
   }
