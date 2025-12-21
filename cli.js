@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 import yargs from 'yargs';
-import {go} from './index.js';
+import { hideBin } from 'yargs/helpers';
+import { go } from './index.js';
 
-const argv = yargs(process.argv).usage(`
+const argv = yargs(hideBin(process.argv))
+.usage(`
 Usage: $0 [-d] path
 
 Running the command with no arguments will modify all files
@@ -31,5 +33,5 @@ Running the command with no arguments will modify all files
 if (argv.h) {
   yargs.showHelp();
 } else {
-  go(argv.d, argv.path);
+  go(argv.d, argv._[0]);
 }
