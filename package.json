@@ -1,0 +1,31 @@
+{
+  "name": "prettify-bru",
+  "version": "0.1.0",
+  "description": "Prettifies JSON and JavaScript blocks in Bruno .bru files",
+  "keywords": [
+    "bruno",
+    "bru",
+    "prettier",
+    "prettify",
+    "body:json",
+    "format",
+    "lint"
+  ],
+  "homepage": "https://github.com/martinjoiner/prettify-bru#readme",
+  "bugs": {
+    "url": "https://github.com/martinjoiner/prettify-bru/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/martinjoiner/prettify-bru.git"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": "Martin Joiner (http://martinjoiner.co.uk)",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "hello": "src/hello.js",
+    "src-index": "src/index.js"
+  }
+}
