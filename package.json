@@ -1,6 +1,6 @@
 {
   "name": "prettify-bru",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Prettifies JSON and JavaScript blocks in Bruno .bru files",
   "keywords": [
     "bruno",
@@ -22,10 +22,9 @@
   "license": "GPL-3.0-or-later",
   "author": "Martin Joiner (http://martinjoiner.co.uk)",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "test",
-    "hello": "src/hello.js",
-    "src-index": "src/index.js"
+    "hello": "src/hello.js"
   }
 }
