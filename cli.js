@@ -2,7 +2,7 @@
 
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
-import {main} from './lib/main';
+import {main} from './lib/main.mjs';
 
 const argv = yargs(hideBin(process.argv))
     .command('$0 [path] [-w|--write]', `Formats all .bru files (including subdirectories)`, (yargs) => {
