@@ -5,18 +5,20 @@ import {hideBin} from 'yargs/helpers';
 import {main} from './lib/main.js';
 
 const argv = yargs(hideBin(process.argv))
-    .usage(`
-Usage: $0 [--write|-w] path
-
-Running the command with no arguments will modify all files
-
-`).options({
+    .command('$0 [path] [-w|--write]', `Formats all .bru files (including subdirectories)`, (yargs) => {
+        return yargs.positional('path', {
+            describe: 'The root path to search from',
+            type: 'string',
+            demandOption: false,
+            default: '',
+            defaultDescription: 'Current working directory'
+        })
+    })
+    .options({
         w: {
+            alias: 'write',
             type: 'boolean',
-            default: false
-        },
-        path: {
-            default: '.',
+            default: false,
         },
     })
     .describe({
@@ -24,15 +26,13 @@ Running the command with no arguments will modify all files
         h: 'Display the help message',
     })
     .boolean(['w', 'h'])
-    .help()
     .alias('h', 'help')
-    .alias('w', 'write')
     .parse();
 
 if (argv.h) {
     yargs.showHelp();
 } else {
-    go(argv._[0], argv.w);
+    go(argv.path, argv.w);
 }
 
 function go(path, write) {
