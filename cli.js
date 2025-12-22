@@ -6,12 +6,12 @@ import { go } from './index.js';
 
 const argv = yargs(hideBin(process.argv))
 .usage(`
-Usage: $0 [-d] path
+Usage: $0 [--write|-w] path
 
 Running the command with no arguments will modify all files
 
 `).options({
-    d: {
+    w: {
       type: 'boolean',
       default: false
     },
@@ -20,18 +20,17 @@ Running the command with no arguments will modify all files
     },
   })
   .describe({
-    d: 'Dry-run (Files will not be modified)',
-    h: 'Display this help message',
+    w: 'Write mode (Formats files in place, overwriting contents)',
+    h: 'Display the help message',
   })
-  .boolean(['d', 'h'])
+  .boolean(['w', 'h'])
   .help()
   .alias('h', 'help')
-  .alias('d', 'check')
-  .alias('d', 'dry-run')
+  .alias('w', 'write')
   .parse();
 
 if (argv.h) {
   yargs.showHelp();
 } else {
-  go(argv.d, argv._[0]);
+  go(argv.w, argv._[0]);
 }

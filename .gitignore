@@ -1,0 +1,6 @@
+
+# Ignore VSCode workspace
+*.code-workspace
+
+# Ignore IntelliJ workspace
+.idea
