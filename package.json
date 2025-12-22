@@ -1,6 +1,6 @@
 {
   "name": "prettify-bru",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Prettifies JSON and JavaScript blocks in Bruno .bru files",
   "keywords": [
     "bruno",
