@@ -36,10 +36,16 @@ To actually **modify** the files, I recommend committing your changes before doi
 npx prettify-bru --write
 ```
 
-⚠️ This will modify the files in place, use with caution.
+⚠️ Including the `--write` option will modify the files in place, use with caution.
 
 To just do a single subdirectory, provide the path as an argument, so search the folder names "speed-tests":
 
 ```
 npx prettify-bru speed-tests
+```
+
+To just do 1 block type (for example just `body:json`), use the `--only` option:
+
+```
+npx prettify-bru --only body:json
 ```

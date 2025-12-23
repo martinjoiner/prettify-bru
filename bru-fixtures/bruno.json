@@ -1,0 +1,8 @@
+{
+  "version": "1",
+  "name": "Foods API",
+  "type": "collection",
+  "ignore": [
+    "node_modules"
+  ]
+}
