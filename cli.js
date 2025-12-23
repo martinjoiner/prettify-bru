@@ -35,8 +35,12 @@ if (argv.h) {
     go(argv.path, argv.w);
 }
 
+/**
+ * @param {string} path
+ * @param {boolean} write
+ */
 function go(path, write) {
-    main(process.cwd(), path, write).catch((err) => {
+    main(console, process.cwd(), path, write).catch((err) => {
         console.error(err);
         process.exitCode = 1;
     });

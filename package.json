@@ -32,7 +32,7 @@
     "yargs": "18.0.0"
   },
   "scripts": {
-    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose"
   },
   "devDependencies": {
     "@jest/globals": "^30.2.0",
