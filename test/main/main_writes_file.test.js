@@ -1,6 +1,5 @@
 import {jest, test, expect} from '@jest/globals'
 
-
 test('main() writes file when write mode is true', async () => {
     jest.unstable_mockModule('../../lib/files.mjs', () => ({
         findFiles: jest.fn().mockName('mockFindFiles').mockReturnValue(['/home/bruno-collection/Simple GET Request.bru']),
@@ -24,9 +23,9 @@ test('main() writes file when write mode is true', async () => {
 
     const mockConsole = {log: jest.fn()}
 
-    return main(mockConsole, '/home', 'bruno-collection', true).then(data => {
+    return main(mockConsole, '/home', 'bruno-collection', true).then(() => {
         expect(readFile).toHaveBeenCalledTimes(1);
-        expect(formatBlocks).toHaveBeenCalledWith('mock file contents');
+        expect(formatBlocks).toHaveBeenCalledWith("mock file contents", null);
         expect(writeFile).toHaveBeenCalledWith('/home/bruno-collection/Simple GET Request.bru', 'New file contents');
     });
 });

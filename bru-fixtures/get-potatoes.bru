@@ -1,0 +1,16 @@
+meta {
+  name: Get All Potatoes
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{host}}/potatoes
+  body: none
+  auth: none
+}
+
+script:post-response {
+  bru.setVar('potatoName', res.body.potatoes[0].name)
+  
+}

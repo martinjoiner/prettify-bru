@@ -13,7 +13,7 @@ test('main() does not write file when write mode is false', async () => {
 
     const mockConsole = {log: jest.fn()}
 
-    return main(mockConsole, '/home', 'bruno-collection', false).then(data => {
+    return main(mockConsole, '/home', 'bruno-collection', false).then(() => {
         expect(writeFile).not.toHaveBeenCalled();
     });
 });

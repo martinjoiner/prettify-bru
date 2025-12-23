@@ -1,0 +1,22 @@
+meta {
+  name: Write Banana (Bad JSON body)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{host}}/banana
+  body: json
+  auth: inherit
+}
+
+body:json {
+    "curviness": 2,
+    "colour": "yellow"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

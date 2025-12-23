@@ -1,0 +1,25 @@
+meta {
+  name: Write Lunch
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{host}}/meal/lunch
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "eggs": 2,
+    "ham": 1,
+    "chips": "many"
+  }
+  
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
