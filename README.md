@@ -59,3 +59,7 @@ To just do 1 block type (for example just `body:json`), use the `--only` option:
 ```
 npx prettify-bru --only body:json
 ```
+
+## CI Pipelines and Workflows
+
+You may want to configure your CI Pipeline to run this command when a pull-request is raised. The `prettify-bru` command returns exit code 1 if it finds any files that contain an error or require reformatting. Otherwise it will return exit code 0.
