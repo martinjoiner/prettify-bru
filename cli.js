@@ -43,7 +43,13 @@ if (argv.h) {
  * @param {?string} only Limit to only the block type with a name containing value
  */
 function go(path, write, only) {
-    main(console, process.cwd(), path, write, only).catch((err) => {
+    main(console, process.cwd(), path, write, only)
+    .then(changesRequired => {
+        if (changesRequired) {
+            process.exitCode = 1
+        }
+    })
+    .catch((err) => {
         console.error(err);
         process.exitCode = 1;
     });
