@@ -1,16 +1,57 @@
 # Prettify Bruno Bru Files
 
-A simple CLI tool to prettify the contents of [Bruno](https://www.usebruno.com/) `.bru` files. It uses [Prettier](https://prettier.io/) to consistently impose a standardised format to both JSON and JavaScript code, in all Bruno files in your project.
+A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/package/prettify-bru).
+
+Uses [Prettier](https://prettier.io/) to impose a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
+
+Handles the following block types:
+
+- `body:json`
+- `script:pre-request`
+- `script:post-request`
+- `tests`
+
+All blocks are parsed using [Babel](https://babeljs.io/docs/babel-parser).
+
+## Table of contents
+
+<!-- TOC -->
+
+- [Why use this?](#why-use-this)
+- [Style choices](#style-choices)
+- [Feedback](#feedback)
+- [Installation](#installation)
+- [How to use prettify-bru](#how-to-use-prettify-bru)
+  - [Basic report](#basic-report)
+  - [Fixing the files](#fixing-the-files)
+  - [Limit to one directory](#limit-to-one-directory)
+  - [Limit to one file](#limit-to-one-file)
+  - [Limit to one block type](#limit-to-one-block-type)
+  - [Complex example](#complex-example)
+- [Automatically checking PRs](#automatically-checking-prs)
+<!-- TOC -->
 
 ## Why use this?
 
-If you use Git (or similar) to track your Bruno collections and share them with your team, nobody wants to waste time discussing cosmetic formatting! Your energy is better spent thinking about the actual tests. If one person happens to be in the habit of using 4-space indentation and adding semi-colons on the end of lines in JavaScript, but another person tends to use 2-space indentation and omits the semi-colons, there is a chance that PRs descend into a tug of war, each pull request containing a bunch of unnecessary cosmetic changes that draw the reviewer's attention away from the important changes that actually impact what is being tested.
+If your team uses Git (or similar) to track and share your Bruno collections, nobody wants to waste time discussing cosmetic formatting! Your energy is better spent thinking about the actual tests.
 
-Thankfully, Bruno is already somewhat opinionated about code style so this project can follow its lead. In the desktop app, when editing a JSON body on a request there is a "Prettify" button which always reformats JSON with 2-space indentation. There is no adjascent option to reformat the "script" or "tests" tabs, so for JavaScript I've had to pick a set of style rules which I think most closely fit with what a QAer would want... familiar and short. I've gone with the same 2-space indentation as JSON, no semi-colons at the end of lines for cleanliness and double-quotes for strings so you can copy and paste chunks between JavaScript and JSON.
+If one person happens to use 4-space indentation but another person uses 2, there is a chance that PRs descend into a tug of war over time; Each subsequent pull request undoing the previous persons indentation, leading to dozens of unnecessary cosmetic changes that distract the reviewer from focussing on the important changes that actually have a material impact on what is being tested.
 
-This package is fairly young, I'm developing it in my free time to help the thousands of QA people living through the industry transition from being manual testers to becoming _test engineers_. They now need a lot of the same tools developers use to implement consistent style but they don't have the background of being developers.
+## Style choices
 
-Any feedback or bug reports are welcome, the Issues tab is open on the Git repo https://github.com/martinjoiner/prettify-bru
+Thankfully, Bruno is already somewhat opinionated about code style so this project can follow its lead. In the desktop app, when editing a JSON body there is a "Prettify" button which always reformats JSON with 2-space indentation.
+
+There is no adjascent option to reformat the "script" or "tests" tabs, so for JavaScript I've had to pick a set of style rules which I think most closely fit with what a QAer would want... familiar and short.
+
+For JavaScript I've gone with the same 2-space indentation as JSON, no semi-colons at the end of lines for cleanliness and double-quotes for strings so you can copy and paste chunks between JavaScript and JSON without having to change all the quotes.
+
+## Feedback
+
+I have developed this package in my free time to help all the QA people living through the industry transition from being manual testers to becoming _Test Engineers_. If you're suddenly sharing hundreds of Bruno files with teammates, you all need to learn good Git etiquette. Code formatters can remove a lot of the stress.
+
+Please use this package on your team's repos and give me any ideas, feedback or bug reports via the "Issues" tab on the Git repo https://github.com/martinjoiner/prettify-bru
+
+Thanks, Martin
 
 ## Installation
 
@@ -24,7 +65,9 @@ npm i prettify-bru
 
 Boom, now you should be ready to go!
 
-## Usage
+## How to use `prettify-bru`
+
+### Basic report
 
 Get a non-destructive report of all files that could potentially be re-formatted by running:
 
@@ -32,15 +75,11 @@ Get a non-destructive report of all files that could potentially be re-formatted
 npx prettify-bru
 ```
 
-The above command will walk all subdirectories finding `.bru` files.
-With each file it will assess the formatting of the JSON/JavaScript inside the following types of block:
+The above command will walk all subdirectories, finding `.bru` files and display a report. It will not modify the files.
 
-- `body:json` will be parsed with the JSON parser
-- `script:pre-request` blocks parsed with Babel
-- `script:post-request` blocks parsed with Babel
-- `tests` blocks parsed with Babel
+### Fixing the files
 
-To actually **modify** the files, I recommend committing your changes before doing this, run the command with the `--write` flag:
+To actually **modify** the files, I recommend committing your changes before doing this, add the `--write` option to the command:
 
 ```
 npx prettify-bru --write
@@ -48,18 +87,42 @@ npx prettify-bru --write
 
 ⚠️ Including the `--write` option will modify the files in place, use with caution.
 
-To just do a single subdirectory, provide the path as an argument, so search the folder names "speed-tests":
+### Limit to one directory
+
+To limit the file search to a single subdirectory, provide the path as an argument. For example to search the folder named "speed-tests" do:
 
 ```
 npx prettify-bru speed-tests
 ```
 
-To just do 1 block type (for example just `body:json`), use the `--only` option:
+### Limit to one file
+
+Similar to above example, you can also provide a specific filename:
+
+```
+npx prettify-bru speed-tests/get-all.bru
+```
+
+### Limit to one block type
+
+Use the `--only` option to just operate on 1 block type and ignore the rest. For example to only assess the `body:json` blocks do:
 
 ```
 npx prettify-bru --only body:json
 ```
 
-## CI Pipelines and Workflows
+### Complex example
 
-You may want to configure your CI Pipeline to run this command when a pull-request is raised. The `prettify-bru` command returns exit code 1 if it finds any files that contain an error or require reformatting. Otherwise it will return exit code 0.
+Fix the formatting of just the `body:json` block in 1 specific file:
+
+```
+npm prettify-bru --write --only body:json speed-tests/get-all.bru
+```
+
+## Automatically checking PRs
+
+You may want to configure Github workflows to run `prettify-bru` whenever a pull-request is raised. If the files are all formatted correctly the action will display in green, otherwise it will show as red to indicate the PR needs to be fixed.
+
+This works because the `prettify-bru` command returns exit code 1 if it finds any files that contain an error or require reformatting. Otherwise it will return exit code 0.
+
+Setup Github Workflows from the "Actions" tab of your repository.
