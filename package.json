@@ -32,7 +32,9 @@
     "yargs": "18.0.0"
   },
   "scripts": {
-    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose"
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest --verbose",
+    "prettier:check": "npx prettier --check --parser babel '**/*.mjs' '**/*.js'",
+    "prettier:fix": "npx prettier --write --parser babel '**/*.mjs' '**/*.js'"
   },
   "devDependencies": {
     "@jest/globals": "^30.2.0",
