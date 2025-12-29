@@ -5,15 +5,15 @@ test('main() passes `only` parameter through to formatBlocks()', async () => {
         findFiles: jest.fn().mockName('mockFindFiles').mockReturnValue(['file.bru']),
         readFile: jest.fn().mockName('mockReadFile').mockReturnValue('mock original file contents'),
         writeFile: jest.fn(),
-    }));
+    }))
 
     jest.unstable_mockModule('../../lib/format.mjs', () => ({
         formatBlocks: jest.fn().mockName('mockFormatBlocks').mockReturnValue({
             newContents: 'New file contents',
             changeable: 1,
-            error_messages: []
-        })
-    }));
+            error_messages: [],
+        }),
+    }))
 
     const {formatBlocks} = await import('../../lib/format.mjs')
 
@@ -22,6 +22,6 @@ test('main() passes `only` parameter through to formatBlocks()', async () => {
     const mockConsole = {log: jest.fn()}
 
     return main(mockConsole, '/dir', 'collection', false, 'body:json').then(() => {
-        expect(formatBlocks).toHaveBeenCalledWith('mock original file contents', 'body:json');
-    });
-});
+        expect(formatBlocks).toHaveBeenCalledWith('mock original file contents', 'body:json')
+    })
+})

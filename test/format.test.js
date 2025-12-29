@@ -2,7 +2,6 @@ import {describe, expect, it} from '@jest/globals'
 import {formatBlocks} from '../lib/format'
 
 describe('The formatBlocks() function', function () {
-
     it('reformats JSON and JavaScript blocks', async () => {
         const originalFileContents = [
             'meta {',
@@ -18,11 +17,11 @@ describe('The formatBlocks() function', function () {
             '',
             'script:pre-request {',
             '      go().then(() => {',
-            '         console.log(\'Hello World\');', // Too much indentation and a semi-colon
+            "         console.log('Hello World');", // Too much indentation and a semi-colon
             '    })',
             '}',
             '',
-        ].join('\n');
+        ].join('\n')
 
         const expected = [
             'meta {',
@@ -42,16 +41,15 @@ describe('The formatBlocks() function', function () {
             '  })',
             '}',
             '',
-        ].join('\n');
+        ].join('\n')
 
-        expect.assertions(3);
+        expect.assertions(3)
         return formatBlocks(originalFileContents).then(result => {
             expect(result.changeable).toBe(2)
             expect(result.error_messages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
-        });
-    });
-
+        })
+    })
 
     it('preserves indentation of comments in JavaScript', async () => {
         /*
@@ -71,16 +69,15 @@ describe('The formatBlocks() function', function () {
             '   */',
             '}',
             '',
-        ].join('\n');
+        ].join('\n')
 
-        expect.assertions(3);
+        expect.assertions(3)
         return formatBlocks(originalFileContents).then(result => {
             expect(result.changeable).toBe(0)
             expect(result.error_messages).toStrictEqual([])
             expect(result.newContents).toBe(originalFileContents)
-        });
-    });
-
+        })
+    })
 
     it('is not greedy when capturing blocks', async () => {
         // This covers a scenario during development where the regex capture groups were too greedy
@@ -101,7 +98,7 @@ describe('The formatBlocks() function', function () {
             '  }',
             '}',
             '',
-        ].join('\n');
+        ].join('\n')
 
         const expected = [
             '',
@@ -119,16 +116,15 @@ describe('The formatBlocks() function', function () {
             '  }',
             '}',
             '',
-        ].join('\n');
+        ].join('\n')
 
-        expect.assertions(3);
+        expect.assertions(3)
         return formatBlocks(originalFileContents).then(result => {
             expect(result.changeable).toBe(1)
             expect(result.error_messages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
-        });
-    });
-
+        })
+    })
 
     it('reports invalid JSON', async () => {
         const originalFileContents = [
@@ -140,34 +136,31 @@ describe('The formatBlocks() function', function () {
             '  }',
             '}',
             '',
-        ].join('\n');
+        ].join('\n')
 
-        expect.assertions(2);
+        expect.assertions(2)
         return formatBlocks(originalFileContents).then(result => {
             expect(result.changeable).toBe(0)
-            expect(result.error_messages[0]).toMatch(/^Prettier could not format body:json because...\nThe input should contain exactly one expression/)
-        });
-    });
-
+            expect(result.error_messages[0]).toMatch(
+                /^Prettier could not format body:json because...\nThe input should contain exactly one expression/
+            )
+        })
+    })
 
     it('searches for all 4 blocks when `only` is null', async () => {
-        expect.assertions(1);
+        expect.assertions(1)
         return formatBlocks('file contents', null).then(result => {
             expect(result.blocksSearchedFor).toBe(4)
-        });
-    });
+        })
+    })
 
-
-    it.each([
-        "body:json",
-        "json",
-        "script:pre-request",
-        "pre-request",
-    ])('searches for 1 block when `only` is set', async (only) => {
-        expect.assertions(1);
-        return formatBlocks('file contents', only).then(result => {
-            expect(result.blocksSearchedFor).toBe(1)
-        });
-    });
-
-});
+    it.each(['body:json', 'json', 'script:pre-request', 'pre-request'])(
+        'searches for 1 block when `only` is set',
+        async only => {
+            expect.assertions(1)
+            return formatBlocks('file contents', only).then(result => {
+                expect(result.blocksSearchedFor).toBe(1)
+            })
+        }
+    )
+})
