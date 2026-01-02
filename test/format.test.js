@@ -257,12 +257,20 @@ describe('The format() function', () => {
             '  file: @file(\\Barry\\Tasteful Noodz\\Leopard Print.jpg) @contentType(image/jpeg)',
             '}',
             '',
+            'other:file {',
+            '  file: @file(\\Barry\\Tasteful Noodz\\Shark Hat.jpg) @contentType(image/jpeg)',
+            '}',
+            '',
         ].join('\n')
 
         const expected = [
             '',
             'body:file {',
             '  file: @file(/Barry/Tasteful Noodz/Leopard Print.jpg) @contentType(image/jpeg)',
+            '}',
+            '',
+            'other:file {',
+            '  file: @file(/Barry/Tasteful Noodz/Shark Hat.jpg) @contentType(image/jpeg)',
             '}',
             '',
         ].join('\n')
