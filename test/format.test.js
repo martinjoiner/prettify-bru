@@ -1,7 +1,7 @@
 import {describe, expect, it} from '@jest/globals'
 import {format} from '../lib/format'
 
-describe('The format() function', function () {
+describe('The format() function', () => {
     it('reformats JSON and JavaScript blocks', async () => {
         const originalFileContents = [
             'meta {',
@@ -48,6 +48,23 @@ describe('The format() function', function () {
             expect(result.changeable).toBe(true)
             expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+        })
+    })
+
+    it('handles bru object methods', async () => {
+        const originalFileContents = [
+            '',
+            'script:post-request {',
+            '  bru.setEnvVar("userUuid", res.body.uuid)',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(false)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(originalFileContents)
         })
     })
 
@@ -232,4 +249,29 @@ describe('The format() function', function () {
             })
         }
     )
+
+    it('replaces back-slashes with forward-slashes in @file path', async () => {
+        const originalFileContents = [
+            '',
+            'body:file {',
+            '  file: @file(\\Barry\\Tasteful Noodz\\Leopard Print.jpg) @contentType(image/jpeg)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'body:file {',
+            '  file: @file(/Barry/Tasteful Noodz/Leopard Print.jpg) @contentType(image/jpeg)',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
 })
