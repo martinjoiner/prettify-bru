@@ -8,7 +8,7 @@ Handles the following block types:
 
 - `body:json`
 - `script:pre-request`
-- `script:post-request`
+- `script:post-response`
 - `tests`
 
 All blocks are parsed using [Babel](https://babeljs.io/docs/babel-parser).

@@ -27,7 +27,7 @@ const argv = yargs(hideBin(process.argv))
                 'json',
                 'script:pre-request',
                 'pre-request',
-                'script:post-request',
+                'script:post-response',
                 'post-request',
                 'tests',
             ],

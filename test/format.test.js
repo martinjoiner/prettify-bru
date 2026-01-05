@@ -54,7 +54,7 @@ describe('The format() function', () => {
     it('handles bru object methods', async () => {
         const originalFileContents = [
             '',
-            'script:post-request {',
+            'script:post-response {',
             '  bru.setEnvVar("userUuid", res.body.uuid)',
             '}',
             '',
