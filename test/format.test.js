@@ -233,6 +233,59 @@ describe('The format() function', () => {
         })
     })
 
+    it('handle non-string placeholders in body:json without error', async () => {
+        const originalFileContents = [
+            'meta {',
+            '  name: Post Grapes',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '  "grapes":{{oneHundredItems}}  , ',
+            '     "farmerName": "{{name}}"',
+            '  }',
+            '}',
+            '',
+            'script:pre-request {',
+            '  const oneHundredItems = []',
+            '  for (let i = 0; i < 100; i++) {',
+            '    oneHundredItems.push({name: "Young Raisin"})',
+            '  }',
+            '  bru.setVar("oneHundredItems", oneHundredItems)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Post Grapes',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '    "grapes": {{oneHundredItems}},', // A non-string placeholder has no double-quotes so it's not real JSON
+            '    "farmerName": "{{name}}"',
+            '  }',
+            '}',
+            '',
+            'script:pre-request {',
+            '  const oneHundredItems = []',
+            '  for (let i = 0; i < 100; i++) {',
+            '    oneHundredItems.push({name: "Young Raisin"})',
+            '  }',
+            '  bru.setVar("oneHundredItems", oneHundredItems)',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
     it('searches for all 4 blocks when `only` is null', async () => {
         expect.assertions(1)
         return format('file contents', null).then(result => {
