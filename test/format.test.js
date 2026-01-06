@@ -272,8 +272,7 @@ describe('The format() function', () => {
             'body:json {',
             '  {',
             '  "grapes":{{oneHundredItems}} , ', // A non-string placeholder has no double-quotes so it's not valid JSON
-            '        "moreGrapes":    {{oneHundredItems}}, ', // Another non-string placeholder
-            '     "farmerName": "{{name}}"', // This string placeholder should remain untouched as it is valid JSON
+            '        "moreGrapes":    {{oneHundredItems}} ', // Another non-string placeholder
             '  }',
             '}',
             '',
@@ -295,8 +294,7 @@ describe('The format() function', () => {
             'body:json {',
             '  {',
             '    "grapes": {{oneHundredItems}},',
-            '    "moreGrapes": {{oneHundredItems}},',
-            '    "farmerName": "{{name}}"',
+            '    "moreGrapes": {{oneHundredItems}}',
             '  }',
             '}',
             '',
@@ -306,6 +304,43 @@ describe('The format() function', () => {
             '    oneHundredItems.push({name: "Young Raisin"})',
             '  }',
             '  bru.setVar("oneHundredItems", oneHundredItems)',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(badlyFormattedFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
+    it('leaves string placeholders in body:json untouched', async () => {
+        const badlyFormattedFileContents = [
+            'meta {',
+            '  name: Post Farmer',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '  "name": "{{name}}" ,  ', // This string placeholder should remain untouched as it is valid JSON
+            '     "farmerName": "Farmer {{name}} Junior"', // This string placeholder should remain untouched as it is valid JSON
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Post Farmer',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '    "name": "{{name}}",',
+            '    "farmerName": "Farmer {{name}} Junior"',
+            '  }',
             '}',
             '',
         ].join('\n')

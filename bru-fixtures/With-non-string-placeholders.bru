@@ -6,7 +6,8 @@ body:json {
   {
   "grapes":{{oneHundredItems}} , // A non-string placeholder has no double-quotes so it's not valid JSON
         "moreGrapes":    {{oneHundredItems}},  // Another non-string placeholder
-     "farmerName": "{{name}}" // This string placeholder should remain untouched as it is valid JSON
+     "name": "{{name}}", // This string placeholder should remain untouched as it is valid JSON
+     "farmerName": "Farmer {{name}} Junior" // And this string placeholder is also already valid JSON
   }
 }
 
