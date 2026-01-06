@@ -233,6 +233,91 @@ describe('The format() function', () => {
         })
     })
 
+    it('knows non-string placeholders in body:json are not errors', async () => {
+        const correctlyFormattedFileContents = [
+            'meta {',
+            '  name: Post Grapes',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '    "grapes": {{oneHundredItems}}', // A non-string placeholder has no double-quotes so it's not valid JSON
+            '  }',
+            '}',
+            '',
+            'script:pre-request {',
+            '  const oneHundredItems = []',
+            '  for (let i = 0; i < 100; i++) {',
+            '    oneHundredItems.push({name: "Young Raisin"})',
+            '  }',
+            '  bru.setVar("oneHundredItems", oneHundredItems)',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(correctlyFormattedFileContents).then(result => {
+            expect(result.changeable).toBe(false)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(correctlyFormattedFileContents)
+        })
+    })
+
+    it('handles multiple non-string placeholders in body:json', async () => {
+        const badlyFormattedFileContents = [
+            'meta {',
+            '  name: Post Grapes',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '  "grapes":{{oneHundredItems}} , ', // A non-string placeholder has no double-quotes so it's not valid JSON
+            '        "moreGrapes":    {{oneHundredItems}}, ', // Another non-string placeholder
+            '     "farmerName": "{{name}}"', // This string placeholder should remain untouched as it is valid JSON
+            '  }',
+            '}',
+            '',
+            'script:pre-request {',
+            '  const oneHundredItems = []',
+            '  for (let i = 0; i < 100; i++) {',
+            '    oneHundredItems.push({name: "Young Raisin"})',
+            '  }',
+            '  bru.setVar("oneHundredItems", oneHundredItems)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Post Grapes',
+            '}',
+            '',
+            'body:json {',
+            '  {',
+            '    "grapes": {{oneHundredItems}},',
+            '    "moreGrapes": {{oneHundredItems}},',
+            '    "farmerName": "{{name}}"',
+            '  }',
+            '}',
+            '',
+            'script:pre-request {',
+            '  const oneHundredItems = []',
+            '  for (let i = 0; i < 100; i++) {',
+            '    oneHundredItems.push({name: "Young Raisin"})',
+            '  }',
+            '  bru.setVar("oneHundredItems", oneHundredItems)',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(badlyFormattedFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
     it('searches for all 4 blocks when `only` is null', async () => {
         expect.assertions(1)
         return format('file contents', null).then(result => {
