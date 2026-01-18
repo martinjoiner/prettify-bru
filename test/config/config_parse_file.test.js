@@ -20,13 +20,28 @@ describe('parseFile() function in config module', () => {
         expect(config).toEqual({})
     })
 
+    it('warns if prettier is not an object', () => {
+        const mockConsole = {log: jest.fn(), warn: jest.fn()}
+
+        // This config incorrectly provides an array for the prettier property
+        const config = parseFile(mockConsole, '{"prettier": ["tabWidth", 2]}')
+
+        expect(mockConsole.log).toHaveBeenCalled()
+        expect(mockConsole.warn).toHaveBeenCalledWith(
+            '⚠️  \x1b[33mprettier is not correct type, it should be an object\x1b[0m'
+        )
+        expect(config).toEqual({})
+    })
+
     it('warns on unsupported properties', () => {
         const mockConsole = {log: jest.fn(), warn: jest.fn()}
 
         const config = parseFile(mockConsole, '{"fish": "horse", "prettier": {}}')
 
         expect(mockConsole.log).toHaveBeenCalled()
-        expect(mockConsole.warn).toHaveBeenCalled()
+        expect(mockConsole.warn).toHaveBeenCalledWith(
+            '⚠️  \x1b[33mfish is not a supported property\x1b[0m'
+        )
         expect(config).toEqual({prettier: {}})
     })
 
