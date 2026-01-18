@@ -35,7 +35,7 @@ If one person happens to use 4-space indentation but another person uses 2, ther
 
 Bruno desktop app is somewhat opinionated about code style, the JSON body input has a "Prettify" button which reformats using 2-space indentation, so this project has followed its lead.
 
-There is no adjascent option to reformat the Script or Tests tabs, so for JavaScript I've selected a default set of options which I think most closely align with a QAer's requirements... familiar and short.
+There is no adjacent option to reformat the Script or Tests tabs, so for JavaScript I've selected a default set of options which I think most closely align with a QAer's requirements... familiar and short.
 
 For JavaScript I've gone with the same 2-space indentation as JSON, no semicolons at the end of lines for cleanliness and double-quotes for strings so you can copy and paste chunks between JavaScript and JSON without having to change all the quotes.
 
