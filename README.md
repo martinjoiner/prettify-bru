@@ -4,14 +4,7 @@ A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/pac
 
 Uses [Prettier](https://prettier.io/) to impose a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
 
-Handles the following block types:
-
-- `body:json`
-- `script:pre-request`
-- `script:post-response`
-- `tests`
-
-All blocks are parsed using [Babel](https://babeljs.io/docs/babel-parser).
+Handles blocks: `body:json`, `script:pre-request`, `script:post-response` and `tests`. All blocks are parsed using [Babel](https://babeljs.io/docs/babel-parser).
 
 ## Table of contents
 
@@ -28,6 +21,7 @@ All blocks are parsed using [Babel](https://babeljs.io/docs/babel-parser).
   - [Limit to one file](#limit-to-one-file)
   - [Limit to one block type](#limit-to-one-block-type)
   - [Complex example](#complex-example)
+- [Config file](#config-file)
 - [Automatically checking PRs](#automatically-checking-prs)
 <!-- TOC -->
 
@@ -39,11 +33,13 @@ If one person happens to use 4-space indentation but another person uses 2, ther
 
 ## Style choices
 
-Thankfully, Bruno is already somewhat opinionated about code style so this project can follow its lead. In the desktop app, when editing a JSON body there is a "Prettify" button which always reformats JSON with 2-space indentation.
+Bruno desktop app is somewhat opinionated about code style, the JSON body input has a "Prettify" button which reformats using 2-space indentation, so this project has followed its lead.
 
-There is no adjascent option to reformat the "script" or "tests" tabs, so for JavaScript I've had to pick a set of style rules which I think most closely fit with what a QAer would want... familiar and short.
+There is no adjascent option to reformat the Script or Tests tabs, so for JavaScript I've selected a default set of options which I think most closely align with a QAer's requirements... familiar and short.
 
-For JavaScript I've gone with the same 2-space indentation as JSON, no semi-colons at the end of lines for cleanliness and double-quotes for strings so you can copy and paste chunks between JavaScript and JSON without having to change all the quotes.
+For JavaScript I've gone with the same 2-space indentation as JSON, no semicolons at the end of lines for cleanliness and double-quotes for strings so you can copy and paste chunks between JavaScript and JSON without having to change all the quotes.
+
+You can configure your project to override any of these options, see the [Config file](#config-file) section below.
 
 ## Feedback
 
@@ -118,6 +114,22 @@ Fix the formatting of just the `body:json` block in 1 specific file:
 ```
 npm prettify-bru --write --only body:json speed-tests/get-all.bru
 ```
+
+## Config file
+
+You can override any of the [Prettier options](https://prettier.io/docs/options) via the `prettier` property in your `.prettifybrurc` file.
+
+For example, to increase the line length limit from the default 80 up to 120 characters, your file would contain:
+
+```json
+{
+    "prettier": {
+        "printWidth": 120
+    }
+}
+```
+
+*Note: Config file is supported from version 1.6.0 and above.*
 
 ## Automatically checking PRs
 

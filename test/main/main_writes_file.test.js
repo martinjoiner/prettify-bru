@@ -7,6 +7,7 @@ test('main() writes file when write mode is true', async () => {
             .mockName('mockFindFiles')
             .mockReturnValue(['/home/bruno-collection/Simple GET Request.bru']),
         readFile: jest.fn().mockName('mockReadFile').mockReturnValue('mock file contents'),
+        readIfExists: jest.fn().mockName('mockReadIfExists').mockReturnValue(null),
         writeFile: jest.fn().mockName('mockWriteFile'),
     }))
 
@@ -28,7 +29,7 @@ test('main() writes file when write mode is true', async () => {
 
     return main(mockConsole, '/home', 'bruno-collection', true).then(() => {
         expect(readFile).toHaveBeenCalledTimes(1)
-        expect(format).toHaveBeenCalledWith('mock file contents', null)
+        expect(format).toHaveBeenCalledWith('mock file contents', null, {})
         expect(writeFile).toHaveBeenCalledWith(
             '/home/bruno-collection/Simple GET Request.bru',
             'New file contents'

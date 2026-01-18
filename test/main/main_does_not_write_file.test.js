@@ -4,6 +4,7 @@ test('main() does not write file when write mode is false', async () => {
     jest.unstable_mockModule('../../lib/files.mjs', () => ({
         findFiles: jest.fn().mockName('mockFindFiles').mockReturnValue(['file.bru']),
         readFile: jest.fn().mockName('mockReadFile').mockReturnValue('mock content'),
+        readIfExists: jest.fn().mockName('mockReadIfExists').mockReturnValue(null),
         writeFile: jest.fn().mockName('mockWriteFile'),
     }))
 

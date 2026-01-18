@@ -164,7 +164,7 @@ describe('The format() function', () => {
         })
     })
 
-    it('removes excess white space and new lines between blocks', async () => {
+    it('removes excess whitespace and new lines between blocks', async () => {
         const originalFileContents = [
             'meta {',
             '  name: Get Bananas',
@@ -232,6 +232,8 @@ describe('The format() function', () => {
             expect(result.changeable).toBe(false)
         })
     })
+
+    /* Coverage of respect for variable placeholders... */
 
     it('knows non-string placeholders in body:json are not errors', async () => {
         const correctlyFormattedFileContents = [
@@ -353,6 +355,8 @@ describe('The format() function', () => {
         })
     })
 
+    /* Coverage of the `only` argument... */
+
     it('searches for all 4 blocks when `only` is null', async () => {
         expect.assertions(1)
         return format('file contents', null).then(result => {
@@ -361,7 +365,7 @@ describe('The format() function', () => {
     })
 
     it.each(['body:json', 'json', 'script:pre-request', 'pre-request'])(
-        'searches for 1 block when `only` is set',
+        'searches for 1 block when `only` is set to "%s"',
         async only => {
             expect.assertions(1)
             return format('file contents', only).then(result => {
@@ -369,6 +373,50 @@ describe('The format() function', () => {
             })
         }
     )
+
+    /* Coverage of `config` argument... */
+
+    it.each([
+        [80, true],
+        [100, true],
+        [120, false],
+    ])(
+        'honours config (`prettier.printWidth` set to %s)',
+        async (printWidth, expectedChangeable) => {
+            const fileWithLinesOver100Chars = [
+                '',
+                'tests {',
+                '  expect(res.body.user.name, "user.name is unexpected type").to.satisfy((v) => v === null || typeof v === "string")',
+                '}',
+                '',
+            ].join('\n')
+
+            // Only in the cases where it does change, this is what we expect it to change to
+            const expectedChanged = [
+                '',
+                'tests {',
+                '  expect(res.body.user.name, "user.name is unexpected type").to.satisfy(',
+                '    (v) => v === null || typeof v === "string"',
+                '  )',
+                '}',
+                '',
+            ].join('\n')
+
+            const config = printWidth === null ? {} : {prettier: {printWidth}}
+
+            expect.assertions(2)
+            return format(fileWithLinesOver100Chars, null, config).then(result => {
+                if (expectedChangeable) {
+                    expect(result.newContents).toBe(expectedChanged)
+                } else {
+                    expect(result.newContents).toBe(fileWithLinesOver100Chars)
+                }
+                expect(result.changeable).toBe(expectedChangeable)
+            })
+        }
+    )
+
+    /* Coverage of folder-separator replacement... */
 
     it('replaces back-slashes with forward-slashes in @file path', async () => {
         const originalFileContents = [
