@@ -143,6 +143,36 @@ describe('The format() function', () => {
         })
     })
 
+    it('handles invalid JSON in body', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            // This JSON is missing an opening curly brace
+            '      "this": "that",',
+            '      "number": 7',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'body:json {',
+            '  "this": "that",',
+            '  "number": 7',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.changeable).toBe(true)
+        })
+    })
+
     it('puts array items on separate lines in a JSON body', async () => {
         const originalFileContents = [
             '',
