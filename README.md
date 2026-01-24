@@ -2,6 +2,7 @@
 
 A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/package/prettify-bru).
 
+Removes junk and makes code shorter and more transferable between systems.
 Imposes a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
 
 `body:json` blocks are formatted using [fast-json-format](https://github.com/usebruno/fast-json-format)
@@ -119,7 +120,47 @@ npm prettify-bru --write --only body:json speed-tests/get-all.bru
 
 ## Config file
 
-You can override any of the [Prettier options](https://prettier.io/docs/options) via the `prettier` property in your `.prettifybrurc` file.
+Create a `.prettifybrurc` file containing a JSON object with one or more of the following properties:
+
+### Agnostic File Paths
+
+Property: `agnosticFilePaths` {boolean} (Default: `true`)
+
+Replaces backslash folder separators in filenames with forward slashes so they work on Windows, Mac and Linux
+
+```
+file: @file(\Images\Memes\3-Spidermen.jpg) @contentType(image/jpeg)
+```
+
+will be changed to...
+
+```
+file: @file(/Images/Memes/3-Spidermen.jpg) @contentType(image/jpeg)
+```
+
+### Shorten Getters
+
+Property: `shortenGetters` {boolean} (Default: `true`)
+
+Shorten code by replacing uses of getters with property references
+
+```javascript
+expect(res.getStatus()).to.eql(200)
+expect(res.getBody().name).to.eql("Dave")
+```
+
+The above will become...
+
+```javascript
+expect(res.status).to.eql(200)
+expect(res.body.name).to.eql("Dave")
+```
+
+### Prettier
+
+Property: `prettier` {Object} (Default: `{}`)
+
+The `prettier` property object can contain overrides for any of the [Prettier options](https://prettier.io/docs/options).
 
 For example, to increase the line length limit from the default 80 up to 120 characters, your file would contain:
 
@@ -131,7 +172,7 @@ For example, to increase the line length limit from the default 80 up to 120 cha
 }
 ```
 
-*Note: Config file is supported from version 1.6.0 and above.*
+*Note: Config file is supported from version [1.6.0](CHANGELOG.md#160) and above.*
 
 ## Automatically checking PRs
 

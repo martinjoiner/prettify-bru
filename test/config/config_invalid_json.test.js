@@ -1,6 +1,6 @@
 import {jest, test, expect} from '@jest/globals'
 
-test('loadConfigFile() handles invalid json', async () => {
+test('loadConfigFile() handles invalid JSON', async () => {
     jest.unstable_mockModule('../../lib/files.mjs', () => ({
         readIfExists: jest.fn().mockName('mockReadIfExists').mockReturnValue('{ '),
     }))
