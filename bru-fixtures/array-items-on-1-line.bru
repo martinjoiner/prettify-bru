@@ -1,7 +1,7 @@
 meta {
-  name: Write Cocktail (Array items on 1 line)
+  name: Array items on 1 line
   type: http
-  seq: 8
+  seq: 1
 }
 
 post {
@@ -15,4 +15,8 @@ body:json {
     "bitters": ["Angostura", "{{fish}}"],
     "ice": true
   }
+}
+
+docs {
+  We expect prettify-bru to reformat the `body:json` block so the array items are on separate lines
 }

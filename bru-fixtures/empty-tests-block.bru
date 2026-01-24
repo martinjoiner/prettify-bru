@@ -1,0 +1,30 @@
+meta {
+  name: Empty tests block
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{host}}/banana
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "roundness": 7
+  }
+}
+
+tests {
+}
+
+script:pre-request {
+}
+
+script:post-response {
+}
+
+docs {
+  We expect prettify-bru to remove the empty 3 empty blocks
+}

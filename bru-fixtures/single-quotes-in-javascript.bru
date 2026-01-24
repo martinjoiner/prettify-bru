@@ -1,0 +1,29 @@
+meta {
+  name: Single-quotes in JavaScript
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{host}}/grapes
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "grapes": {{oneHundredItems}}
+  }
+}
+
+script:pre-request {
+  const oneHundredItems = [];
+  for (let i = 0; i < 100; i++) {
+    oneHundredItems.push({ name: 'Young Raisin' })
+  }
+  bru.setVar('oneHundredItems', oneHundredItems)
+}
+
+docs {
+  We expect prettify-bru to reformat `script:pre-request`, replacing single-quotes with double-quotes, removing space around curly-braces and removing semi-colons
+}
