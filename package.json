@@ -1,6 +1,6 @@
 {
   "name": "prettify-bru",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Prettifies JSON and JavaScript blocks in Bruno .bru files",
   "keywords": [
     "bruno",
@@ -28,7 +28,7 @@
   ],
   "bin": "./cli.js",
   "dependencies": {
-    "fast-json-format": "^0.4.0",
+    "jsonc-parser": "^3.3.1",
     "prettier": "^3.3.3",
     "yargs": "18.0.0"
   },

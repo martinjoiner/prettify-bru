@@ -1,0 +1,20 @@
+meta {
+  name: Backslash folder separators
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{host}}/profile/pic
+  body: file
+  auth: inherit
+}
+
+body:file {
+  file: @file(\Barry\Tasteful Noodz\Leopard Print.jpg) @contentType(image/jpeg)
+  file: @file(\Barry\Tasteful Noodz\Fancy Hat.jpg) @contentType(image/jpeg)
+}
+
+docs {
+  We expect prettify-bru to replace the backslash folder separators in `@file()` with forwardslashes (unless `agnosticFilePaths` is set to `false` in config)
+}

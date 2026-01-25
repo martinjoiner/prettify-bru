@@ -77,8 +77,8 @@ describe('The format() function', () => {
         const originalFileContents = [
             '',
             'tests {',
-            '  test("Is the response a 200", function () {',
-            '    expect(res.getStatus()).to.equal(200)',
+            '  test("Is the response a 200", () => {',
+            '    expect(res.status).to.equal(200)',
             '  })',
             '  ',
             '  /*',
@@ -90,9 +90,9 @@ describe('The format() function', () => {
 
         expect.assertions(3)
         return format(originalFileContents).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
             expect(result.changeable).toBe(false)
             expect(result.errorMessages).toStrictEqual([])
-            expect(result.newContents).toBe(originalFileContents)
         })
     })
 
@@ -385,6 +385,27 @@ describe('The format() function', () => {
         })
     })
 
+    it('handles multiple lines with non-string placeholders and comments', async () => {
+        // In an earlier version of the code, contents like this would get all mixed up with the
+        // comments moved to a new line which then swallows up the next property and made a mess
+        const originalContents = [
+            '',
+            'body:json {',
+            '  {',
+            '    "grapes": {{oneHundredItems}}, // These are the grapes',
+            '    "moreGrapes": {{oneHundredItems}} // Another non-string placeholder',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(2)
+        return format(originalContents).then(result => {
+            expect(result.newContents).toBe(originalContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
     it('leaves string placeholders in body:json untouched', async () => {
         const badlyFormattedFileContents = [
             'meta {',
@@ -515,6 +536,88 @@ describe('The format() function', () => {
             expect(result.newContents).toBe(expected)
             expect(result.changeable).toBe(true)
             expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('honours config (`agnosticFilePaths` set to false)', async () => {
+        const originalFileContents = [
+            'body:file {',
+            '  file: @file(\\Jimbo\\Holiday Pics\\Beach.jpg) @contentType(image/jpeg)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {agnosticFilePaths: false}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
+    /* Coverage of shortenGetters feature... */
+
+    it('replaces getters with property references', async () => {
+        const originalFileContents = [
+            '',
+            'script:post-response {',
+            '  console.log(res.getHeaders())',
+            '  console.log(acres.getBody().farm)', // This line should not be changed
+            '}',
+            '',
+            'tests {',
+            '  console.log(req.getBody({raw: true}))', // This line should not be changed
+            '  expect(res.getStatusText()).to.eql("OK")',
+            '  expect(res.getStatus()).to.eql(200)',
+            '  expect(res.getBody().name).to.eql("Dave")',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'script:post-response {',
+            '  console.log(res.headers)',
+            '  console.log(acres.getBody().farm)',
+            '}',
+            '',
+            'tests {',
+            '  console.log(req.getBody({raw: true}))',
+            '  expect(res.statusText).to.eql("OK")',
+            '  expect(res.status).to.eql(200)',
+            '  expect(res.body.name).to.eql("Dave")',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('honours config (`shortenGetters` set to `false`)', async () => {
+        const originalFileContents = [
+            '',
+            'script:post-response {',
+            '  console.log(res.getHeaders())',
+            '}',
+            '',
+            'tests {',
+            '  expect(res.getBody().name).to.eql("Dave")',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {shortenGetters: false}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
         })
     })
 })

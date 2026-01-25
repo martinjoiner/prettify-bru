@@ -1,7 +1,7 @@
 meta {
-  name: Write Banana (Bad JSON body)
+  name: Invalid JSON body
   type: http
-  seq: 2
+  seq: 7
 }
 
 post {
@@ -19,4 +19,8 @@ body:json {
 settings {
   encodeUrl: true
   timeout: 0
+}
+
+docs {
+  We expect prettify-bru to format the invalid body so all 3 lines have no indentation
 }

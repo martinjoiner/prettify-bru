@@ -1,0 +1,29 @@
+meta {
+  name: Getters used on res object
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{host}}/potatoes
+  body: none
+  auth: none
+}
+
+script:post-response {
+  bru.setVar("potatoName", res.getBody().potatoes[0].name)
+}
+
+tests {
+  test("response code is 200", () => {
+    expect(res.getStatus()).to.eql(200)
+  })
+  
+  test("response body contains correct name", () => {
+    expect(res.getBody().name).to.eql("Phil")
+  })
+}
+
+docs {
+  We expect prettify-bru to replace `res.getBody()` with `res.body` (unless `shortenGetters` is set to `false` in config)
+}

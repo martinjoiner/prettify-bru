@@ -1,6 +1,7 @@
 meta {
-  name: Write Apple (Valid but excess new lines)
+  name: Excess newlines between blocks
   type: http
+  seq: 4
 }
   
 
@@ -25,4 +26,8 @@ body:json {
 settings {
   encodeUrl: true
   timeout: 0
+}
+
+docs {
+  We expect prettify-bru to remove the excess newline characters between the blocks
 }
