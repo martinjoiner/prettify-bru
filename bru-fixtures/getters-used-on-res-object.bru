@@ -1,7 +1,7 @@
 meta {
   name: Getters used on res object
   type: http
-  seq: 6
+  seq: 8
 }
 
 get {
@@ -18,7 +18,7 @@ tests {
   test("response code is 200", () => {
     expect(res.getStatus()).to.eql(200)
   })
-  
+
   test("response body contains correct name", () => {
     expect(res.getBody().name).to.eql("Phil")
   })
