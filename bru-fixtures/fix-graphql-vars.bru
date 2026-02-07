@@ -1,0 +1,48 @@
+meta {
+  name: Fix GraphQL body and vars
+  type: graphql
+  seq: 7
+}
+
+post {
+  url: {{host}}/drinks/cocktail
+  body: graphql
+  auth: inherit
+}
+
+body:graphql {
+  mutation createCocktail(
+    $name: String!
+    $displayName: String
+    $description: String
+  ) {
+    createCocktail(
+      input: {name: $name, displayName: $displayName, description: $description}
+    ) {
+      id
+      name
+      displayName
+      description
+      createTime
+      updateTime
+      etag
+      __typename
+    }
+  }
+}
+
+body:graphql:vars {
+  {
+    "name" : "{{customerName}}",
+      "displayName": "{{customerDisplayName}}",
+    "description": "{{customerDescription}}"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
+
+docs {
+  GraphQL vars are in JSON format, so we should indent them like we would any other JSON.
+}
