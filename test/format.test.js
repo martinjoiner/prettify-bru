@@ -51,6 +51,149 @@ describe('The format() function', () => {
         })
     })
 
+    it('reformats GraphQL blocks', async () => {
+        const originalFileContents = [
+            'meta {',
+            '  name: Test Test',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createCocktail(',
+            '      $name: String!, $displayName: String',
+            '         $description: String',
+            '  ) {',
+            '  ',
+            '        # test comment, should be aligned too',
+            '    createCocktail(',
+            '      input: {',
+            '          name: $name,',
+            '            displayName: $displayName,',
+            '        description: $description}',
+            '    ) {',
+            '      id',
+            '      name',
+            '        displayName',
+            '        # another test comment, should be aligned too',
+            '      description',
+            '      createTime',
+            '        updateTime',
+            '       etag',
+            '      __typename',
+            '    }',
+            '  }',
+            '}',
+            '',
+            'script:pre-request {',
+            '      go().then(() => {',
+            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
+            '    })',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Test Test',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createCocktail(',
+            '    $name: String!',
+            '    $displayName: String',
+            '    $description: String',
+            '  ) {',
+            '    # test comment, should be aligned too',
+            '    createCocktail(',
+            '      input: { name: $name, displayName: $displayName, description: $description }',
+            '    ) {',
+            '      id',
+            '      name',
+            '      displayName',
+            '      # another test comment, should be aligned too',
+            '      description',
+            '      createTime',
+            '      updateTime',
+            '      etag',
+            '      __typename',
+            '    }',
+            '  }',
+            '  ', // There is empty line added by the GraphQL formatter in Bruno
+            '}',
+            '',
+            'script:pre-request {',
+            '  go().then(() => {',
+            '    console.log("Hello World")',
+            '  })',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
+    it('reformats GraphQL blocks to always contain exactly 1 line in the end', async () => {
+        const originalFileContents = [
+            'meta {',
+            '  name: Test Test',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createCocktail($name: String!) {',
+            '    createCocktail(',
+            '      input: { name: $name}',
+            '    ) {',
+            '      id',
+            '    }',
+            '  }',
+            '  ',
+            '  ',
+            '  ',
+            '  ',
+            '}',
+            '',
+            'script:pre-request {',
+            '      go().then(() => {',
+            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
+            '    })',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            'meta {',
+            '  name: Test Test',
+            '}',
+            '',
+            'body:graphql {',
+            '  mutation createCocktail($name: String!) {',
+            '    createCocktail(input: { name: $name }) {',
+            '      id',
+            '    }',
+            '  }',
+            '  ', // There is empty line added by the GraphQL formatter in Bruno
+            '}',
+            '',
+            'script:pre-request {',
+            '  go().then(() => {',
+            '    console.log("Hello World")',
+            '  })',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(3)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+            expect(result.newContents).toBe(expected)
+        })
+    })
+
     it('handles bru object methods', async () => {
         const originalFileContents = [
             '',
@@ -143,35 +286,38 @@ describe('The format() function', () => {
         })
     })
 
-    it('handles invalid JSON in body', async () => {
-        const originalFileContents = [
-            '',
-            'body:json {',
-            // This JSON is missing an opening curly brace
-            '      "this": "that",',
-            '      "number": 7',
-            '  }',
-            '}',
-            '',
-        ].join('\n')
+    it.each(['body:json', 'body:graphql:vars'])(
+        'handles invalid JSON in %s block',
+        async blockName => {
+            const originalFileContents = [
+                '',
+                `${blockName} {`,
+                // This JSON is missing an opening curly brace
+                '      "this": "that",',
+                '      "number": 7',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
 
-        const expected = [
-            '',
-            'body:json {',
-            '  "this": "that",',
-            '  "number": 7',
-            '  }',
-            '}',
-            '',
-        ].join('\n')
+            const expected = [
+                '',
+                `${blockName} {`,
+                '  "this": "that",',
+                '  "number": 7',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
 
-        expect.assertions(3)
-        return format(originalFileContents).then(result => {
-            expect(result.newContents).toBe(expected)
-            expect(result.errorMessages).toStrictEqual([])
-            expect(result.changeable).toBe(true)
-        })
-    })
+            expect.assertions(3)
+            return format(originalFileContents).then(result => {
+                expect(result.newContents).toBe(expected)
+                expect(result.errorMessages).toStrictEqual([])
+                expect(result.changeable).toBe(true)
+            })
+        }
+    )
 
     it('puts array items on separate lines in a JSON body', async () => {
         const originalFileContents = [
@@ -207,29 +353,33 @@ describe('The format() function', () => {
         })
     })
 
-    it.each(['body:json', 'script:pre-request', 'script:post-response', 'tests'])(
-        'strips out an empty %s block',
-        async blockName => {
-            const originalFileContents = [
-                '',
-                'docs {',
-                '  Hello World',
-                '}',
-                '',
-                `${blockName} {`,
-                '}',
-                '',
-            ].join('\n')
+    it.each([
+        'body:json',
+        'body:graphql',
+        'body:graphql:vars',
+        'script:pre-request',
+        'script:post-response',
+        'tests',
+    ])('strips out an empty %s block', async blockName => {
+        const originalFileContents = [
+            '',
+            'docs {',
+            '  Hello World',
+            '}',
+            '',
+            `${blockName} {`,
+            '}',
+            '',
+        ].join('\n')
 
-            const expected = ['', 'docs {', '  Hello World', '}', ''].join('\n')
+        const expected = ['', 'docs {', '  Hello World', '}', ''].join('\n')
 
-            expect.assertions(2)
-            return format(originalFileContents).then(result => {
-                expect(result.newContents).toBe(expected)
-                expect(result.changeable).toBe(true)
-            })
-        }
-    )
+        expect.assertions(2)
+        return format(originalFileContents).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+        })
+    })
 
     it('removes excess whitespace and new lines between blocks', async () => {
         const originalFileContents = [
@@ -302,165 +452,184 @@ describe('The format() function', () => {
 
     /* Coverage of respect for variable placeholders... */
 
-    it('knows non-string placeholders in body:json are not errors', async () => {
-        const correctlyFormattedFileContents = [
-            'meta {',
-            '  name: Post Grapes',
-            '}',
-            '',
-            'body:json {',
-            '  {',
-            '    "grapes": {{oneHundredItems}}', // A non-string placeholder has no double-quotes so it's not valid JSON
-            '  }',
-            '}',
-            '',
-            'script:pre-request {',
-            '  const oneHundredItems = []',
-            '  for (let i = 0; i < 100; i++) {',
-            '    oneHundredItems.push({name: "Young Raisin"})',
-            '  }',
-            '  bru.setVar("oneHundredItems", oneHundredItems)',
-            '}',
-            '',
-        ].join('\n')
+    it.each(['body:json', 'body:graphql:vars'])(
+        'knows non-string placeholders in %s blocks are not errors',
+        async blockName => {
+            const correctlyFormattedFileContents = [
+                'meta {',
+                '  name: Post Grapes',
+                '}',
+                '',
+                `${blockName} {`,
+                '  {',
+                '    "grapes": {{oneHundredItems}}', // A non-string placeholder has no double-quotes so it's not valid JSON
+                '  }',
+                '}',
+                '',
+                'script:pre-request {',
+                '  const oneHundredItems = []',
+                '  for (let i = 0; i < 100; i++) {',
+                '    oneHundredItems.push({name: "Young Raisin"})',
+                '  }',
+                '  bru.setVar("oneHundredItems", oneHundredItems)',
+                '}',
+                '',
+            ].join('\n')
 
-        expect.assertions(3)
-        return format(correctlyFormattedFileContents).then(result => {
-            expect(result.changeable).toBe(false)
-            expect(result.errorMessages).toStrictEqual([])
-            expect(result.newContents).toBe(correctlyFormattedFileContents)
-        })
-    })
-
-    it('handles multiple non-string placeholders in body:json', async () => {
-        const badlyFormattedFileContents = [
-            'meta {',
-            '  name: Post Grapes',
-            '}',
-            '',
-            'body:json {',
-            '  {',
-            '  "grapes":{{oneHundredItems}} , ', // A non-string placeholder has no double-quotes so it's not valid JSON
-            '        "moreGrapes":    {{oneHundredItems}} ', // Another non-string placeholder
-            '  }',
-            '}',
-            '',
-            'script:pre-request {',
-            '  const oneHundredItems = []',
-            '  for (let i = 0; i < 100; i++) {',
-            '    oneHundredItems.push({name: "Young Raisin"})',
-            '  }',
-            '  bru.setVar("oneHundredItems", oneHundredItems)',
-            '}',
-            '',
-        ].join('\n')
-
-        const expected = [
-            'meta {',
-            '  name: Post Grapes',
-            '}',
-            '',
-            'body:json {',
-            '  {',
-            '    "grapes": {{oneHundredItems}},',
-            '    "moreGrapes": {{oneHundredItems}}',
-            '  }',
-            '}',
-            '',
-            'script:pre-request {',
-            '  const oneHundredItems = []',
-            '  for (let i = 0; i < 100; i++) {',
-            '    oneHundredItems.push({name: "Young Raisin"})',
-            '  }',
-            '  bru.setVar("oneHundredItems", oneHundredItems)',
-            '}',
-            '',
-        ].join('\n')
-
-        expect.assertions(3)
-        return format(badlyFormattedFileContents).then(result => {
-            expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
-            expect(result.newContents).toBe(expected)
-        })
-    })
-
-    it('handles multiple lines with non-string placeholders and comments', async () => {
-        // In an earlier version of the code, contents like this would get all mixed up with the
-        // comments moved to a new line which then swallows up the next property and made a mess
-        const originalContents = [
-            '',
-            'body:json {',
-            '  {',
-            '    "grapes": {{oneHundredItems}}, // These are the grapes',
-            '    "moreGrapes": {{oneHundredItems}} // Another non-string placeholder',
-            '  }',
-            '}',
-            '',
-        ].join('\n')
-
-        expect.assertions(2)
-        return format(originalContents).then(result => {
-            expect(result.newContents).toBe(originalContents)
-            expect(result.changeable).toBe(false)
-        })
-    })
-
-    it('leaves string placeholders in body:json untouched', async () => {
-        const badlyFormattedFileContents = [
-            'meta {',
-            '  name: Post Farmer',
-            '}',
-            '',
-            'body:json {',
-            '  {',
-            '  "name": "{{name}}" ,  ', // This string placeholder should remain untouched as it is valid JSON
-            '     "farmerName": "Farmer {{name}} Junior"', // This string placeholder should remain untouched as it is valid JSON
-            '  }',
-            '}',
-            '',
-        ].join('\n')
-
-        const expected = [
-            'meta {',
-            '  name: Post Farmer',
-            '}',
-            '',
-            'body:json {',
-            '  {',
-            '    "name": "{{name}}",',
-            '    "farmerName": "Farmer {{name}} Junior"',
-            '  }',
-            '}',
-            '',
-        ].join('\n')
-
-        expect.assertions(3)
-        return format(badlyFormattedFileContents).then(result => {
-            expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
-            expect(result.newContents).toBe(expected)
-        })
-    })
-
-    /* Coverage of the `only` argument... */
-
-    it('searches for all 4 blocks when `only` is null', async () => {
-        expect.assertions(1)
-        return format('file contents', null).then(result => {
-            expect(result.blocksSearchedFor).toBe(4)
-        })
-    })
-
-    it.each(['body:json', 'json', 'script:pre-request', 'pre-request'])(
-        'searches for 1 block when `only` is set to "%s"',
-        async only => {
-            expect.assertions(1)
-            return format('file contents', only).then(result => {
-                expect(result.blocksSearchedFor).toBe(1)
+            expect.assertions(3)
+            return format(correctlyFormattedFileContents).then(result => {
+                expect(result.changeable).toBe(false)
+                expect(result.errorMessages).toStrictEqual([])
+                expect(result.newContents).toBe(correctlyFormattedFileContents)
             })
         }
     )
+
+    it.each(['body:json', 'body:graphql:vars'])(
+        'handles multiple non-string placeholders in %s blocks',
+        async blockName => {
+            const badlyFormattedFileContents = [
+                'meta {',
+                '  name: Post Grapes',
+                '}',
+                '',
+                `${blockName} {`,
+                '  {',
+                '  "grapes":{{oneHundredItems}} , ', // A non-string placeholder has no double-quotes so it's not valid JSON
+                '        "moreGrapes":    {{oneHundredItems}} ', // Another non-string placeholder
+                '  }',
+                '}',
+                '',
+                'script:pre-request {',
+                '  const oneHundredItems = []',
+                '  for (let i = 0; i < 100; i++) {',
+                '    oneHundredItems.push({name: "Young Raisin"})',
+                '  }',
+                '  bru.setVar("oneHundredItems", oneHundredItems)',
+                '}',
+                '',
+            ].join('\n')
+
+            const expected = [
+                'meta {',
+                '  name: Post Grapes',
+                '}',
+                '',
+                `${blockName} {`,
+                '  {',
+                '    "grapes": {{oneHundredItems}},',
+                '    "moreGrapes": {{oneHundredItems}}',
+                '  }',
+                '}',
+                '',
+                'script:pre-request {',
+                '  const oneHundredItems = []',
+                '  for (let i = 0; i < 100; i++) {',
+                '    oneHundredItems.push({name: "Young Raisin"})',
+                '  }',
+                '  bru.setVar("oneHundredItems", oneHundredItems)',
+                '}',
+                '',
+            ].join('\n')
+
+            expect.assertions(3)
+            return format(badlyFormattedFileContents).then(result => {
+                expect(result.changeable).toBe(true)
+                expect(result.errorMessages).toStrictEqual([])
+                expect(result.newContents).toBe(expected)
+            })
+        }
+    )
+
+    it.each(['body:json', 'body:graphql:vars'])(
+        'handles multiple lines with non-string placeholders and comments in %s blocks',
+        async blockName => {
+            // In an earlier version of the code, contents like this would get all mixed up with the
+            // comments moved to a new line which then swallows up the next property and made a mess
+            const originalContents = [
+                '',
+                `${blockName} {`,
+                '  {',
+                '    "grapes": {{oneHundredItems}}, // These are the grapes',
+                '    "moreGrapes": {{oneHundredItems}} // Another non-string placeholder',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            expect.assertions(2)
+            return format(originalContents).then(result => {
+                expect(result.newContents).toBe(originalContents)
+                expect(result.changeable).toBe(false)
+            })
+        }
+    )
+
+    it.each(['body:json', 'body:graphql:vars'])(
+        'leaves string placeholders in %s blocks untouched',
+        async blockName => {
+            const badlyFormattedFileContents = [
+                'meta {',
+                '  name: Post Farmer',
+                '}',
+                '',
+                `${blockName} {`,
+                '  {',
+                '  "name": "{{name}}" ,  ', // This string placeholder should remain untouched as it is valid JSON
+                '     "farmerName": "Farmer {{name}} Junior"', // This string placeholder should remain untouched as it is valid JSON
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            const expected = [
+                'meta {',
+                '  name: Post Farmer',
+                '}',
+                '',
+                `${blockName} {`,
+                '  {',
+                '    "name": "{{name}}",',
+                '    "farmerName": "Farmer {{name}} Junior"',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            expect.assertions(3)
+            return format(badlyFormattedFileContents).then(result => {
+                expect(result.changeable).toBe(true)
+                expect(result.errorMessages).toStrictEqual([])
+                expect(result.newContents).toBe(expected)
+            })
+        }
+    )
+
+    /* Coverage of the `only` argument... */
+
+    it('searches for all 6 blocks when `only` is null', async () => {
+        expect.assertions(1)
+        return format('file contents', null).then(result => {
+            expect(result.blocksSearchedFor).toBe(6)
+        })
+    })
+
+    it.each([
+        'body:json',
+        'json',
+        'body:graphql',
+        'body:graphql:vars',
+        'script:pre-request',
+        'pre-request',
+        'script:post-response',
+        'post-response',
+        'tests',
+    ])('searches for 1 block when `only` is set to "%s"', async only => {
+        expect.assertions(1)
+        return format('file contents', only).then(result => {
+            expect(result.blocksSearchedFor).toBe(1)
+        })
+    })
 
     /* Coverage of `config` argument... */
 

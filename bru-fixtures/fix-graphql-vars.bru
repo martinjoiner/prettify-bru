@@ -17,7 +17,7 @@ body:graphql {
     $description: String
   ) {
     createCocktail(
-      input: {name: $name, displayName: $displayName, description: $description}
+      input: { name: $name, displayName: $displayName, description: $description }
     ) {
       id
       name
@@ -29,6 +29,7 @@ body:graphql {
       __typename
     }
   }
+  
 }
 
 body:graphql:vars {
