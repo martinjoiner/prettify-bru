@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.9.0
+
+New functionality expands the list of blocks that can be formatted to include `body:graphql` and `body:graphql:vars`.
+
+❤️ Thank you to [Pavel Kutáč](https://github.com/arxeiss) ([arxeiss](https://github.com/arxeiss)) for this contribution.
+
 ## 1.8.0
 
 New feature to shorten code by replacing uses of getters on the `res` object with property references where possible.
