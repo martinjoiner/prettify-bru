@@ -1,4 +1,5 @@
 import {jest, it, expect, describe} from '@jest/globals'
+import {styleText} from 'node:util'
 import {parseFile} from '../../lib/config.mjs'
 
 describe('parseFile() function in config module', () => {
@@ -7,7 +8,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{}')
 
         expect(mockConsole.log).toHaveBeenCalledWith(
-            '🔧 \x1b[2mUsing config file .prettifybrurc\x1b[0m'
+            `🔧 ${styleText('dim', 'Using config file .prettifybrurc')}`
         )
         expect(config).toEqual({})
     })
@@ -17,7 +18,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, fileContents)
 
         expect(mockConsole.error).toHaveBeenCalledWith(
-            '\x1b[31m.prettifybrurc is not valid, the JSON is not an Object\x1b[0m\n'
+            styleText('red', '.prettifybrurc is not valid, the JSON is not an Object') + '\n'
         )
         expect(config).toEqual({})
     })
@@ -35,7 +36,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{"agnosticFilePaths": ["yes"]}')
 
         expect(mockConsole.warn).toHaveBeenCalledWith(
-            '⚠️  \x1b[33m"agnosticFilePaths" is not correct type, it should be a boolean\x1b[0m'
+            `⚠️  ${styleText('yellow', '"agnosticFilePaths" is not correct type, it should be a boolean')}`
         )
         expect(config).toEqual({})
     })
@@ -46,7 +47,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{"shortenGetters": "yes"}')
 
         expect(mockConsole.warn).toHaveBeenCalledWith(
-            '⚠️  \x1b[33m"shortenGetters" is not correct type, it should be a boolean\x1b[0m'
+            `⚠️  ${styleText('yellow', '"shortenGetters" is not correct type, it should be a boolean')}`
         )
         expect(config).toEqual({})
     })
@@ -57,7 +58,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{"prettier": ["tabWidth", 2]}')
 
         expect(mockConsole.warn).toHaveBeenCalledWith(
-            '⚠️  \x1b[33m"prettier" is not correct type, it should be an object\x1b[0m'
+            `⚠️  ${styleText('yellow', '"prettier" is not correct type, it should be an object')}`
         )
         expect(config).toEqual({})
     })
@@ -67,7 +68,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{"fish": "horse"}')
 
         expect(mockConsole.warn).toHaveBeenCalledWith(
-            '⚠️  \x1b[33mIgnoring unsupported property "fish"\x1b[0m'
+            `⚠️  ${styleText('yellow', 'Ignoring unsupported property "fish"')}`
         )
         expect(config).toEqual({})
     })
