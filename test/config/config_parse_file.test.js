@@ -122,7 +122,7 @@ describe('parseFile() function in config module', () => {
         const mockConsole = {log: jest.fn()}
         const config = parseFile(mockConsole, '{"stripConsoleOutput": ["log", "warn"]}')
 
-        expect(config).toEqual({stripConsoleOutput: ["log", "warn"]})
+        expect(config).toEqual({stripConsoleOutput: ['log', 'warn']})
     })
 
     it('warns if `stripConsoleOutput` array contains invalid values', () => {

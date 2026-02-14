@@ -917,13 +917,7 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        const expected = [
-            '',
-            'tests {',
-            '  expect(res.status).to.eql(200)',
-            '}',
-            '',
-        ].join('\n')
+        const expected = ['', 'tests {', '  expect(res.status).to.eql(200)', '}', ''].join('\n')
 
         const config = {stripConsoleOutput: true}
 
