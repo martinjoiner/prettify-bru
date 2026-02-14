@@ -3,6 +3,7 @@
 import yargs from 'yargs'
 import {hideBin} from 'yargs/helpers'
 import {main} from './lib/main.mjs'
+import {onlyParamOptions} from './lib/onlyParam.mjs'
 
 const argv = yargs(hideBin(process.argv))
     .command(
@@ -20,17 +21,9 @@ const argv = yargs(hideBin(process.argv))
     )
     .options({
         only: {
-            describe: 'Limit to only 1 block type',
+            describe: 'Limit to only certain block types',
             type: 'string',
-            choices: [
-                'body:json',
-                'json',
-                'script:pre-request',
-                'pre-request',
-                'script:post-response',
-                'post-request',
-                'tests',
-            ],
+            choices: Object.keys(onlyParamOptions),
         },
         w: {
             describe: 'Write mode (Formats files in place, overwriting contents)',

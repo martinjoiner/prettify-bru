@@ -631,6 +631,26 @@ describe('The format() function', () => {
         })
     })
 
+    it.each([
+        [2, 'graphql'],
+        [2, 'script'],
+        [3, 'body'],
+    ])(
+        'searches for %i blocks when `only` is set to "%s"',
+        async (expectedBlocksSearchedFor, only) => {
+            expect.assertions(1)
+            return format('file contents', only).then(result => {
+                expect(result.blocksSearchedFor).toBe(expectedBlocksSearchedFor)
+            })
+        }
+    )
+
+    it('throws Error when `only` is not a valid value', async () => {
+        await expect(format('file contents', 'monkey')).rejects.toThrow(
+            'Invalid value for only parameter'
+        )
+    })
+
     /* Coverage of `config` argument... */
 
     it.each([

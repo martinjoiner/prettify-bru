@@ -14,7 +14,6 @@ Imposes a standard format on all blocks of JSON and JavaScript code across multi
 ## Table of contents
 
 <!-- TOC -->
-
 - [Why use this?](#why-use-this)
 - [Style choices](#style-choices)
 - [Feedback](#feedback)
@@ -24,9 +23,12 @@ Imposes a standard format on all blocks of JSON and JavaScript code across multi
   - [Fixing the files](#fixing-the-files)
   - [Limit to one directory](#limit-to-one-directory)
   - [Limit to one file](#limit-to-one-file)
-  - [Limit to one block type](#limit-to-one-block-type)
+  - [Limit to only a subset of blocks](#limit-to-only-a-subset-of-blocks)
   - [Complex example](#complex-example)
 - [Config file](#config-file)
+  - [Agnostic File Paths](#agnostic-file-paths)
+  - [Shorten Getters](#shorten-getters)
+  - [Prettier](#prettier)
 - [Automatically checking PRs](#automatically-checking-prs)
 <!-- TOC -->
 
@@ -104,13 +106,19 @@ Similar to above example, you can also provide a specific filename:
 npx prettify-bru speed-tests/get-all.bru
 ```
 
-### Limit to one block type
+### Limit to only a subset of blocks
 
-Use the `--only` option to just operate on 1 block type and ignore the rest. For example to only assess the `body:json` blocks do:
+Use the `--only` option to operate on a specific block or subset of blocks. For example to only assess the `body:json` blocks in your files, specify the exact name of the block:
 
 ```
 npx prettify-bru --only body:json
 ```
+
+Some values target groups of blocks:
+
+- "graphql" will operate on `body:graphql` and `body:graphql:vars`
+- "script" will do both `script:pre-request` and `script:post-response`
+- "body" will target all 3 body blocks `body:json`, `body:graphql` and `body:graphql:vars`
 
 ### Complex example
 
