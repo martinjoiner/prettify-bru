@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.9.1
+
+Fixes bug affecting text output in environments that do not support text colourisation/styling. Another excellent contribution by [Pavel Kutáč](https://github.com/arxeiss) ([arxeiss](https://github.com/arxeiss)).
+
+Fixes a few bugs in the implementation of the `only` param and expands it to support GraphQL blocks. Also adds documentation, see [Limit to only a subset of blocks](README.md#limit-to-only-a-subset-of-blocks).
+
 ## 1.9.0
 
 New functionality expands the list of blocks that can be formatted to include `body:graphql` and `body:graphql:vars`.
@@ -33,7 +39,7 @@ New feature that strips out empty blocks. Added after discovering that if a requ
 ```
 tests {
 }
-``` 
+```
 
 Empty blocks like the example above can accidentally creep in when `.bru` files are being edited directly through a code editor.
 
