@@ -809,4 +809,143 @@ describe('The format() function', () => {
             expect(result.changeable).toBe(false)
         })
     })
+
+    /* Coverage of stripConsoleOutput feature... */
+
+    it('strips all console output when stripConsoleOutput is true', async () => {
+        const originalFileContents = [
+            '',
+            'script:pre-request {',
+            '  console.log("Debug message")',
+            '  const x = 5',
+            '  console.warn("Warning message")',
+            '  bru.setVar("x", x)',
+            '  console.error("Error message")',
+            '}',
+            '',
+            'tests {',
+            '  console.log(res.status)',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'script:pre-request {',
+            '  const x = 5',
+            '  bru.setVar("x", x)',
+            '}',
+            '',
+            'tests {',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: true}
+
+        expect.assertions(3)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('does not strip console output when stripConsoleOutput is false', async () => {
+        const originalFileContents = [
+            '',
+            'tests {',
+            '  console.log("Debug message")',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: false}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
+    it('strips only specified console types when array is provided', async () => {
+        const originalFileContents = [
+            '',
+            'script:post-response {',
+            '  console.log("This should be removed")',
+            '  console.warn("This should be removed too")',
+            '  console.error("This should stay")',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'script:post-response {',
+            '  console.error("This should stay")',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: ['log', 'warn']}
+
+        expect.assertions(3)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('strips console statements with various argument patterns', async () => {
+        const originalFileContents = [
+            '',
+            'tests {',
+            '  console.log("simple string")',
+            '  console.log(res.status)',
+            '  console.log("multiple", "arguments", 123)',
+            "  console.log('single quotes')",
+            '  console.log(`template ${literal}`)',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = ['', 'tests {', '  expect(res.status).to.eql(200)', '}', ''].join('\n')
+
+        const config = {stripConsoleOutput: true}
+
+        expect.assertions(3)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('does not strip console output from non-JavaScript blocks', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            '  {',
+            '    "message": "console.log should stay in JSON"',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: true}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
 })

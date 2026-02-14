@@ -93,4 +93,45 @@ describe('parseFile() function in config module', () => {
 
         expect(config.prettier).toEqual({semi: true})
     })
+
+    it('warns if `stripConsoleOutput` is not a boolean or array of strings', () => {
+        const mockConsole = {log: jest.fn(), warn: jest.fn()}
+        const config = parseFile(mockConsole, '{"stripConsoleOutput": "yes"}')
+
+        expect(mockConsole.warn).toHaveBeenCalledWith(
+            `⚠️  ${styleText('yellow', '"stripConsoleOutput" is not correct type, it should be a boolean or an array of strings')}`
+        )
+        expect(config).toEqual({})
+    })
+
+    it('transfers `stripConsoleOutput` property when boolean true', () => {
+        const mockConsole = {log: jest.fn()}
+        const config = parseFile(mockConsole, '{"stripConsoleOutput": true}')
+
+        expect(config).toEqual({stripConsoleOutput: true})
+    })
+
+    it('transfers `stripConsoleOutput` property when boolean false', () => {
+        const mockConsole = {log: jest.fn()}
+        const config = parseFile(mockConsole, '{"stripConsoleOutput": false}')
+
+        expect(config).toEqual({stripConsoleOutput: false})
+    })
+
+    it('transfers `stripConsoleOutput` property when array of valid strings', () => {
+        const mockConsole = {log: jest.fn()}
+        const config = parseFile(mockConsole, '{"stripConsoleOutput": ["log", "warn"]}')
+
+        expect(config).toEqual({stripConsoleOutput: ['log', 'warn']})
+    })
+
+    it('warns if `stripConsoleOutput` array contains invalid values', () => {
+        const mockConsole = {log: jest.fn(), warn: jest.fn()}
+        const config = parseFile(mockConsole, '{"stripConsoleOutput": ["log", "invalid"]}')
+
+        expect(mockConsole.warn).toHaveBeenCalledWith(
+            `⚠️  ${styleText('yellow', '"stripConsoleOutput" is not correct type, it should be a boolean or an array of strings')}`
+        )
+        expect(config).toEqual({})
+    })
 })
