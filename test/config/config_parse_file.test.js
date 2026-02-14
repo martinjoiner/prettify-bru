@@ -18,7 +18,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, fileContents)
 
         expect(mockConsole.error).toHaveBeenCalledWith(
-            styleText('red', '.prettifybrurc is not valid, the JSON is not an Object') + '\n'
+            styleText('red', '.prettifybrurc is not valid, the JSON is not an Object\n')
         )
         expect(config).toEqual({})
     })
