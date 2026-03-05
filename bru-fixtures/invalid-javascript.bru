@@ -1,0 +1,25 @@
+meta {
+  name: Invalid JavaScript
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{host}}/pear
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "species": "conference"
+  }
+}
+
+script:post-response {
+  const x = {
+}
+
+docs {
+  We expect prettify-bru to report the invalid JavaScript in post-response script as an error
+}
