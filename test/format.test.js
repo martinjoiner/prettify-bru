@@ -319,6 +319,29 @@ describe('The format() function', () => {
         }
     )
 
+    it.each(['script:pre-request', 'script:post-response', 'tests', 'body:graphql'])(
+        'returns an error message when Prettier cannot format %s block',
+        async blockName => {
+            const invalidJs = 'const x = {'
+            const originalFileContents = [
+                '',
+                `${blockName} {`,
+                `  ${invalidJs}`,
+                '}',
+                '',
+            ].join('\n')
+
+            expect.assertions(3)
+            return format(originalFileContents).then(result => {
+                expect(result.errorMessages).toHaveLength(1)
+                expect(result.errorMessages[0]).toContain(
+                    `Prettier could not format ${blockName} because...`
+                )
+                expect(result.changeable).toBe(false)
+            })
+        }
+    )
+
     it('puts array items on separate lines in a JSON body', async () => {
         const originalFileContents = [
             '',
