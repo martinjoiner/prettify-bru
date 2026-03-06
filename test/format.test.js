@@ -17,7 +17,7 @@ describe('The format() function', () => {
             '',
             'script:pre-request {',
             '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
+            "         bru.setVar('message', 'Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
             '    })',
             '}',
             '',
@@ -37,7 +37,7 @@ describe('The format() function', () => {
             '',
             'script:pre-request {',
             '  go().then(() => {',
-            '    console.log("Hello World")',
+            '    bru.setVar("message", "Hello World")',
             '  })',
             '}',
             '',
@@ -83,12 +83,6 @@ describe('The format() function', () => {
             '  }',
             '}',
             '',
-            'script:pre-request {',
-            '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
-            '    })',
-            '}',
-            '',
         ].join('\n')
 
         const expected = [
@@ -118,12 +112,6 @@ describe('The format() function', () => {
             '    }',
             '  }',
             '  ', // There is empty line added by the GraphQL formatter in Bruno
-            '}',
-            '',
-            'script:pre-request {',
-            '  go().then(() => {',
-            '    console.log("Hello World")',
-            '  })',
             '}',
             '',
         ].join('\n')
@@ -156,12 +144,6 @@ describe('The format() function', () => {
             '  ',
             '}',
             '',
-            'script:pre-request {',
-            '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
-            '    })',
-            '}',
-            '',
         ].join('\n')
 
         const expected = [
@@ -176,12 +158,6 @@ describe('The format() function', () => {
             '    }',
             '  }',
             '  ', // There is empty line added by the GraphQL formatter in Bruno
-            '}',
-            '',
-            'script:pre-request {',
-            '  go().then(() => {',
-            '    console.log("Hello World")',
-            '  })',
             '}',
             '',
         ].join('\n')
@@ -430,7 +406,7 @@ describe('The format() function', () => {
             '',
             '', // Surplus new line
             'tests {',
-            '  console.log("Hello")',
+            '  test("Response code is 200", () => res.status === 200)',
             '}',
             '',
         ].join('\n')
@@ -447,7 +423,7 @@ describe('The format() function', () => {
             '}',
             '',
             'tests {',
-            '  console.log("Hello")',
+            '  test("Response code is 200", () => res.status === 200)',
             '}',
             '',
         ].join('\n')
@@ -472,7 +448,7 @@ describe('The format() function', () => {
             '}',
             '',
             'tests {',
-            '  console.log("Hello")',
+            '  test("Response code is 200", () => res.status === 200)',
             '}',
             '',
         ].join('\n')
@@ -931,12 +907,12 @@ describe('The format() function', () => {
         const originalFileContents = [
             '',
             'script:post-response {',
-            '  console.log(res.getHeaders())',
-            '  console.log(acres.getBody().farm)', // This line should not be changed
+            '  bru.setVar("headers", res.getHeaders())',
+            '  bru.setVar("farm", acres.getBody().farm)', // This line should not be changed
             '}',
             '',
             'tests {',
-            '  console.log(req.getBody({raw: true}))', // This line should not be changed
+            '  bru.setVar("rawBody", req.getBody({raw: true}))', // This line should not be changed
             '  expect(res.getStatusText()).to.eql("OK")',
             '  expect(res.getStatus()).to.eql(200)',
             '  expect(res.getBody().name).to.eql("Dave")',
@@ -947,12 +923,12 @@ describe('The format() function', () => {
         const expected = [
             '',
             'script:post-response {',
-            '  console.log(res.headers)',
-            '  console.log(acres.getBody().farm)',
+            '  bru.setVar("headers", res.headers)',
+            '  bru.setVar("farm", acres.getBody().farm)',
             '}',
             '',
             'tests {',
-            '  console.log(req.getBody({raw: true}))',
+            '  bru.setVar("rawBody", req.getBody({raw: true}))',
             '  expect(res.statusText).to.eql("OK")',
             '  expect(res.status).to.eql(200)',
             '  expect(res.body.name).to.eql("Dave")',
@@ -972,7 +948,7 @@ describe('The format() function', () => {
         const originalFileContents = [
             '',
             'script:post-response {',
-            '  console.log(res.getHeaders())',
+            '  bru.setVar("headers", res.getHeaders())',
             '}',
             '',
             'tests {',
@@ -982,6 +958,145 @@ describe('The format() function', () => {
         ].join('\n')
 
         const config = {shortenGetters: false}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
+    /* Coverage of stripConsoleOutput feature... */
+
+    it('strips all console output when stripConsoleOutput is true', async () => {
+        const originalFileContents = [
+            '',
+            'script:pre-request {',
+            '  console.log("Debug message")',
+            '  const x = 5',
+            '  console.warn("Warning message")',
+            '  bru.setVar("x", x)',
+            '  console.error("Error message")',
+            '}',
+            '',
+            'tests {',
+            '  console.log(res.status)',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'script:pre-request {',
+            '  const x = 5',
+            '  bru.setVar("x", x)',
+            '}',
+            '',
+            'tests {',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: true}
+
+        expect.assertions(3)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('does not strip console output when stripConsoleOutput is false', async () => {
+        const originalFileContents = [
+            '',
+            'tests {',
+            '  console.log("Debug message")',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: false}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(originalFileContents)
+            expect(result.changeable).toBe(false)
+        })
+    })
+
+    it('strips only specified console types when array is provided', async () => {
+        const originalFileContents = [
+            '',
+            'script:post-response {',
+            '  console.log("This should be removed")',
+            '  console.warn("This should be removed too")',
+            '  console.error("This should stay")',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'script:post-response {',
+            '  console.error("This should stay")',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: ['log', 'warn']}
+
+        expect.assertions(3)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('strips console statements with various argument patterns', async () => {
+        const originalFileContents = [
+            '',
+            'tests {',
+            '  console.log("simple string")',
+            '  console.log(res.status)',
+            '  console.log("multiple", "arguments", 123)',
+            "  console.log('single quotes')",
+            '  console.log(`template ${literal}`)',
+            '  expect(res.status).to.eql(200)',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = ['', 'tests {', '  expect(res.status).to.eql(200)', '}', ''].join('\n')
+
+        const config = {stripConsoleOutput: true}
+
+        expect.assertions(3)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.newContents).toBe(expected)
+            expect(result.changeable).toBe(true)
+            expect(result.errorMessages).toStrictEqual([])
+        })
+    })
+
+    it('does not strip console output from non-JavaScript blocks', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            '  {',
+            '    "message": "console.log should stay in JSON"',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        const config = {stripConsoleOutput: true}
 
         expect.assertions(2)
         return format(originalFileContents, null, config).then(result => {
