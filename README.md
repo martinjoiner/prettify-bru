@@ -2,12 +2,12 @@
 
 A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/package/prettify-bru).
 
-Removes junk and makes code shorter and more transferable between systems.
+Removes junk, lints JavaScript for errors and makes code shorter and more transferable between systems.
 Imposes a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
 
-`body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser) by default, or optionally using [Prettier](https://prettier.io/) (with the `jsonc` parser) when the `jsonFormatter` option is set to "prettier".
+JSON blocks (`body:json` and `body:graphql:vars`) are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser) by default, or optionally using [Prettier](https://prettier.io/) (with the `jsonc` parser) when the `jsonFormatter` option is set to "prettier".
 
-`script:pre-request`, `script:post-response` and `tests` blocks are formatted using [Prettier](https://prettier.io/) with [Babel](https://babeljs.io/docs/babel-parser) parser.
+JavaScript blocks (`script:pre-request`, `script:post-response` and `tests`) are linted using [ESLint](https://eslint.org/) and then formatted using [Prettier](https://prettier.io/).
 
 `body:graphql` blocks are formatted using [Prettier](https://prettier.io/) with GraphQL parser.
 
@@ -31,6 +31,7 @@ Imposes a standard format on all blocks of JSON and JavaScript code across multi
   - [Shorten Getters](#shorten-getters)
   - [JSON Formatter](#json-formatter)
   - [Prettier](#prettier)
+  - [ESLint](#eslint)
 - [Automatically checking PRs](#automatically-checking-prs)
 <!-- TOC -->
 
@@ -60,7 +61,7 @@ Thanks, Martin
 
 ## Installation
 
-Requires Node.js 20+
+Requires Node.js 20.19 or higher
 
 To install in your project, run:
 
@@ -216,7 +217,43 @@ For example, to increase the line length limit from the default 80 up to 120 cha
 }
 ```
 
-*Note: Config file is supported from version [1.6.0](CHANGELOG.md#160) and above.*
+### ESLint
+
+Property: `esLintRules` {"recommended"|Object|false} (Default: "recommended")
+
+Set it to the string "recommended" to use Martin's recommended ruleset:
+
+```json
+{
+    "esLintRules": "recommended"
+}
+```
+
+The recommended ruleset is currently `no-console`, `no-redeclare`, `no-sequences`, `no-unused-vars` and `no-var` all set as "error" and `prefer-arrow-callback` and `prefer-const` set as "warn". This ruleset may change in future versions as I experiment with them in daily Bruno use.
+
+Completely turn off linting of your JavaScript blocks by setting `esLintRules` to `false`:
+
+```json
+{
+    "esLintRules": false
+}
+```
+
+Define your own set of rules and severity level by setting it to an object of key-value pairs with the rule name as the key and either "error", "warn", or "off" as the value. [Full list of ESLint rules](https://eslint.org/docs/latest/rules/).
+
+The following example enables 2 rules at different severity levels. The `no-console` rule only causes a warning so even if some code is detected which breaks the rule, it will not prevent the script from returning an exit code of 0 (Success). The `no-unused-vars` rule is set to "error" meaning any violations will result in exit code 1 (Error). Finally, the `prefer-const` rule is off:
+
+```json
+{
+    "esLintRules": {
+        "no-console": "warn",
+        "no-unused-vars": "error",
+        "prefer-const": "off"
+    }
+}
+```
+
+_Note: Config file is supported from version [1.6.0](CHANGELOG.md#160) and above._
 
 ## Automatically checking PRs
 

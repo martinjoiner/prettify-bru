@@ -1,0 +1,40 @@
+meta {
+  name: Unused const in JavaScript
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{host}}/cucumber
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "green": true
+  }
+}
+
+tests {
+  test("Body should be an array", function () {
+    expect(res.body).to.be.an("array")
+  })
+}
+
+script:pre-request {
+  var body = null
+  var body = req.body
+  console.log(body)
+}
+
+script:post-response {
+  const body = res.body;
+  for (let i = 0; i < 100; i++) {
+    bru.setVar(`var${i}`, i)
+  }
+}
+
+docs {
+  We expect ESLint to pick-up the use of var, the redeclare, the console output and the unused const as errors
+}
