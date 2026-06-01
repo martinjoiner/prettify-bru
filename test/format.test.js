@@ -1019,7 +1019,6 @@ describe('The format() function', () => {
 
             expect.assertions(3)
             return format(originalFileContents, null, config).then(result => {
-                console.log(result.newContents)
                 expect(result.newContents).toBe(withoutTrailingCommas)
                 expect(result.errorMessages).toStrictEqual([])
                 expect(result.changeable).toBe(true)
