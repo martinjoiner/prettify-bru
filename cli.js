@@ -53,7 +53,7 @@ if (argv.h) {
  * @param {string} path
  * @param {boolean} write Whether to actually modify the files or not
  * @param {?string} only Limit to only the block type with a name containing value
- * @param {string} jsonFormatter Whether to use Prettier for JSON blocks
+ * @param {?string} jsonFormatter Whether to use Prettier for JSON blocks
  */
 function go(path, write, only, jsonFormatter) {
     const cliConfig = {}
