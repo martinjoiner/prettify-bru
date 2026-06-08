@@ -989,4 +989,55 @@ describe('The format() function', () => {
             expect(result.changeable).toBe(false)
         })
     })
+
+    it.each(['body:json', 'body:graphql:vars'])(
+        'uses Prettier for %s when jsonFormatter is set to "prettier"',
+        async blockName => {
+            const originalFileContents = [
+                '',
+                blockName + ' {',
+                '  {',
+                '      "this": [ {{somePlaceholder}}, "b", "c",],',
+                '  "number": 7,',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            const withoutTrailingCommas = [
+                '',
+                blockName + ' {',
+                '  {',
+                '    "this": [{{somePlaceholder}}, "b", "c"],',
+                '    "number": 7',
+                '  }',
+                '}',
+                '',
+            ].join('\n')
+
+            const config = {jsonFormatter: 'prettier'}
+
+            expect.assertions(3)
+            return format(originalFileContents, null, config).then(result => {
+                expect(result.newContents).toBe(withoutTrailingCommas)
+                expect(result.errorMessages).toStrictEqual([])
+                expect(result.changeable).toBe(true)
+            })
+        }
+    )
+
+    it('returns error when Prettier cannot format body:json with jsonFormatter set to "prettier"', async () => {
+        const invalidJson = '{"key": invalid}'
+        const originalFileContents = ['', 'body:json {', `  ${invalidJson}`, '}', ''].join('\n')
+
+        const config = {jsonFormatter: 'prettier'}
+
+        expect.assertions(2)
+        return format(originalFileContents, null, config).then(result => {
+            expect(result.errorMessages).toHaveLength(1)
+            expect(result.errorMessages[0]).toContain(
+                'Prettier could not format body:json because...'
+            )
+        })
+    })
 })
