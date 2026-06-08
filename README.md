@@ -24,11 +24,12 @@ Imposes a standard format on all blocks of JSON and JavaScript code across multi
   - [Limit to one directory](#limit-to-one-directory)
   - [Limit to one file](#limit-to-one-file)
   - [Limit to only a subset of blocks](#limit-to-only-a-subset-of-blocks)
+  - [Use Prettier for JSON formatting](#use-prettier-for-json-formatting)
   - [Complex example](#complex-example)
 - [Config file](#config-file)
   - [Agnostic File Paths](#agnostic-file-paths)
   - [Shorten Getters](#shorten-getters)
-  - [Use Prettier for JSON formatting](#use-prettier-for-json-formatting)
+  - [JSON Formatter](#json-formatter)
   - [Prettier](#prettier)
 - [Automatically checking PRs](#automatically-checking-prs)
 <!-- TOC -->
