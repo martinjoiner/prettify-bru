@@ -1030,7 +1030,7 @@ describe('The format() function', () => {
         const invalidJson = '{"key": invalid}'
         const originalFileContents = ['', 'body:json {', `  ${invalidJson}`, '}', ''].join('\n')
 
-        const config = {jsonFormatter: 'preetier'}
+        const config = {jsonFormatter: 'prettier'}
 
         expect.assertions(2)
         return format(originalFileContents, null, config).then(result => {

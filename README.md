@@ -28,7 +28,7 @@ Imposes a standard format on all blocks of JSON and JavaScript code across multi
 - [Config file](#config-file)
   - [Agnostic File Paths](#agnostic-file-paths)
   - [Shorten Getters](#shorten-getters)
-  - [Prettify JSON](#prettify-json)
+  - [Use Prettier for JSON formatting](#use-prettier-for-json-formatting)
   - [Prettier](#prettier)
 - [Automatically checking PRs](#automatically-checking-prs)
 <!-- TOC -->
@@ -123,13 +123,15 @@ Some values target groups of blocks:
 
 ### Use Prettier for JSON formatting
 
-By default, `body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser). To use Prettier instead, add the `--json-formatter=prettier` flag:
+By default, `body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser), this matches the behaviour of the "Prettify" button in the Bruno application.
+
+However you may wish to use the `--json-formatter=prettier` flag to switch prettify-bru to use Prettier instead:
 
 ```
 npx prettify-bru --json-formatter=prettier --write
 ```
 
-This will format JSON blocks using Prettier's `jsonc` parser with trailing commas disabled, producing valid JSON with comment support (which Bruno strips out). Note that this will not be in sync with the "Prettify" button in Bruno's UI, but the output will be valid JSON without trailing commas.
+This will format JSON blocks using Prettier's `jsonc` parser with trailing commas disabled, meaning it will automatically fix trailing commas producing valid JSON with comments still supported. Note that this behaviour diverges from the "Prettify" button in Bruno's UI which does not strip trailing commas.
 
 ### Complex example
 
