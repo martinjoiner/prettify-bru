@@ -5,7 +5,7 @@ A CLI tool to [prettify and format Bruno `.bru` files](https://www.npmjs.com/pac
 Removes junk and makes code shorter and more transferable between systems.
 Imposes a standard format on all blocks of JSON and JavaScript code across multiple [Bruno](https://www.usebruno.com/) `.bru` files in your project.
 
-`body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser) by default, or optionally with [Prettier](https://prettier.io/) using the `jsonc` parser when the `jsonFormatter` option is set to "prettier".
+`body:json` and `body:graphql:vars` blocks are formatted using [jsonc-parser](https://www.npmjs.com/package/jsonc-parser) by default, or optionally using [Prettier](https://prettier.io/) (with the `jsonc` parser) when the `jsonFormatter` option is set to "prettier".
 
 `script:pre-request`, `script:post-response` and `tests` blocks are formatted using [Prettier](https://prettier.io/) with [Babel](https://babeljs.io/docs/babel-parser) parser.
 
@@ -181,7 +181,7 @@ expect(res.body.name).to.eql("Dave")
 
 ### JSON Formatter
 
-Property: `jsonFormatter` {string} (Default: `jsonc`)
+Property: `jsonFormatter` {string} (Default: `jsonc-parser`)
 
 Sets which formatter to use for JSON blocks (`body:json` and `body:graphql:vars`).
 

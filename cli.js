@@ -35,7 +35,7 @@ const argv = yargs(hideBin(process.argv))
             describe:
                 'Use Prettier (instead of jsonc-parser) for body:json and body:graphql:vars blocks',
             type: 'string',
-            choices: ['jsonc', 'prettier', null],
+            choices: ['jsonc-parser', 'prettier', null],
             default: null,
         },
     })

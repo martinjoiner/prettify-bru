@@ -58,7 +58,7 @@ describe('parseFile() function in config module', () => {
         const config = parseFile(mockConsole, '{"jsonFormatter": true}')
 
         expect(mockConsole.warn).toHaveBeenCalledWith(
-            `⚠️  ${styleText('yellow', '"jsonFormatter" is not correct type, it should be jsonc or prettier')}`
+            `⚠️  ${styleText('yellow', '"jsonFormatter" is not correct type, it should be jsonc-parser or prettier')}`
         )
         expect(config).toEqual({})
     })
