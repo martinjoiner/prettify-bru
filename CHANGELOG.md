@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.10.0
+
+Introduces new `jsonFormatter` option to allow users to configure which package is used to format JSON blocks. See [JSON Formatter](README.md#json-formatter).
+
+🤟 Thank you to [Pavel Kutáč](https://github.com/arxeiss) ([arxeiss](https://github.com/arxeiss)) for another contribution.
+
 ## 1.9.2
 
 Fixes bug formatting JSON with a placeholder as a key. Found and fixed by [Pavel Kutáč](https://github.com/arxeiss) ([arxeiss](https://github.com/arxeiss)) 💪.
