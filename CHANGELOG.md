@@ -1,5 +1,9 @@
 # Change Log
 
+## 2.0.0
+
+New feature of JavaScript linting using ESLint package and major change to issue report so it describes what is wrong with each file where possible.
+
 ## 1.10.0
 
 Introduces new `jsonFormatter` option to allow users to configure which package is used to format JSON blocks. See [JSON Formatter](README.md#json-formatter).
