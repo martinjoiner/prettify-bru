@@ -74,6 +74,45 @@ describe('parseFile() function in config module', () => {
         expect(config).toEqual({})
     })
 
+    // Coverage of eslint property...
+
+    it('logs if user has not configured `esLintRules`', () => {
+        const mockConsole = {log: jest.fn()}
+        // This config file does not set the esLintRules property
+        parseFile(mockConsole, '{}')
+
+        expect(mockConsole.log).toHaveBeenCalledTimes(3)
+        expect(mockConsole.log).toHaveBeenNthCalledWith(
+            2,
+            `   ${styleText('dim', `"esLintRules" is not set. Defaulting to recommended ruleset.`)}`
+        )
+    })
+
+    it('warns if `esLintRules` is neither an object or false', () => {
+        const mockConsole = {log: jest.fn(), warn: jest.fn()}
+        // This config incorrectly provides an array for the esLintRules property
+        const config = parseFile(mockConsole, '{"esLintRules": [1, 2]}')
+
+        expect(mockConsole.warn).toHaveBeenCalledWith(
+            `⚠️  ${styleText('yellow', '"esLintRules" is not correct type, it should be the string "recommended" or an object or false')}`
+        )
+        expect(config).toEqual({})
+    })
+
+    it.each([false, 'recommended', {'no-console': 'warn'}])(
+        'accepts all types of value for esLintRules property',
+        val => {
+            const mockConsole = {log: jest.fn(), warn: jest.fn()}
+            const fileContents = JSON.stringify({esLintRules: val})
+            const config = parseFile(mockConsole, fileContents)
+
+            expect(mockConsole.warn).not.toHaveBeenCalled()
+            expect(config).toEqual({esLintRules: val})
+        }
+    )
+
+    // Coverage of unsupported properties...
+
     it('warns on unsupported properties', () => {
         const mockConsole = {log: jest.fn(), warn: jest.fn()}
         const config = parseFile(mockConsole, '{"fish": "horse"}')
@@ -83,6 +122,8 @@ describe('parseFile() function in config module', () => {
         )
         expect(config).toEqual({})
     })
+
+    // Coverage of transferring properties from file to config object...
 
     it('transfers `agnosticFilePaths` property', () => {
         const mockConsole = {log: jest.fn()}

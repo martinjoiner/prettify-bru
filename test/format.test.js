@@ -1,5 +1,6 @@
-import {describe, expect, it} from '@jest/globals'
+import {describe, expect, it, jest} from '@jest/globals'
 import {format} from '../lib/format'
+import {loadESLintEngine} from '../lib/lint.mjs'
 
 describe('The format() function', () => {
     it('reformats JSON and JavaScript blocks', async () => {
@@ -17,7 +18,7 @@ describe('The format() function', () => {
             '',
             'script:pre-request {',
             '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
+            "         bru.setVar('message', 'Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
             '    })',
             '}',
             '',
@@ -37,8 +38,105 @@ describe('The format() function', () => {
             '',
             'script:pre-request {',
             '  go().then(() => {',
-            '    console.log("Hello World")',
+            '    bru.setVar("message", "Hello World")',
             '  })',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(7)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(2)
+            expect(result.blockReports[0].blockName).toBe('body:json')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted JSON',
+                    severity: 2,
+                },
+            ])
+            expect(result.blockReports[1].blockName).toBe('script:pre-request')
+            expect(result.blockReports[1].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted JavaScript',
+                    severity: 2,
+                },
+            ])
+        })
+    })
+
+    it('removes excess whitespace from body:json', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            '  ', // <-- Excess blank line
+            '  {',
+            '    "leafType": "variegated",',
+            '    ', // <-- Excess blank line
+            '    "stemCount": 134',
+            '    ', // <-- Excess blank line
+            '  }',
+            '  ', // <-- Excess blank line
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'body:json {',
+            '  {',
+            '    "leafType": "variegated",',
+            '    "stemCount": 134',
+            '  }',
+            '}',
+            '',
+        ].join('\n')
+
+        expect.assertions(5)
+        return format(originalFileContents).then(result => {
+            expect(result.changeable).toBe(true)
+            expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:json')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted JSON',
+                    severity: 2,
+                },
+            ])
+        })
+    })
+
+    it('removes excess lines between blocks', async () => {
+        const originalFileContents = [
+            '',
+            'body:json {',
+            '  {',
+            '    "suspect": "Bernie Tiede"',
+            '  }',
+            '}',
+            '',
+            '', // <-- Excess blank line
+            'script:post-response {',
+            '  bru.setVar("foo", "bar")',
+            '}',
+            '',
+        ].join('\n')
+
+        const expected = [
+            '',
+            'body:json {',
+            '  {',
+            '    "suspect": "Bernie Tiede"',
+            '  }',
+            '}',
+            '',
+            'script:post-response {',
+            '  bru.setVar("foo", "bar")',
             '}',
             '',
         ].join('\n')
@@ -46,8 +144,19 @@ describe('The format() function', () => {
         expect.assertions(3)
         return format(originalFileContents).then(result => {
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+            expect(result.blockReports).toStrictEqual([
+                {
+                    blockName: null,
+                    issues: [
+                        {
+                            fixable: true,
+                            message: 'Excess lines between blocks',
+                            severity: 2,
+                        },
+                    ],
+                },
+            ])
         })
     })
 
@@ -83,12 +192,6 @@ describe('The format() function', () => {
             '  }',
             '}',
             '',
-            'script:pre-request {',
-            '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
-            '    })',
-            '}',
-            '',
         ].join('\n')
 
         const expected = [
@@ -120,19 +223,19 @@ describe('The format() function', () => {
             '  ', // There is empty line added by the GraphQL formatter in Bruno
             '}',
             '',
-            'script:pre-request {',
-            '  go().then(() => {',
-            '    console.log("Hello World")',
-            '  })',
-            '}',
-            '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(5)
         return format(originalFileContents).then(result => {
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:graphql')
+            expect(result.blockReports[0].issues[0]).toStrictEqual({
+                fixable: true,
+                message: 'Badly formatted GraphQL',
+                severity: 2,
+            })
         })
     })
 
@@ -156,12 +259,6 @@ describe('The format() function', () => {
             '  ',
             '}',
             '',
-            'script:pre-request {',
-            '      go().then(() => {',
-            "         console.log('Hello World');", // Too much indentation, wrong type of quotes and a semi-colon
-            '    })',
-            '}',
-            '',
         ].join('\n')
 
         const expected = [
@@ -178,19 +275,21 @@ describe('The format() function', () => {
             '  ', // There is empty line added by the GraphQL formatter in Bruno
             '}',
             '',
-            'script:pre-request {',
-            '  go().then(() => {',
-            '    console.log("Hello World")',
-            '  })',
-            '}',
-            '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(5)
         return format(originalFileContents).then(result => {
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:graphql')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted GraphQL',
+                    severity: 2,
+                },
+            ])
         })
     })
 
@@ -206,7 +305,7 @@ describe('The format() function', () => {
         expect.assertions(3)
         return format(originalFileContents).then(result => {
             expect(result.changeable).toBe(false)
-            expect(result.errorMessages).toStrictEqual([])
+            expect(result.blockReports).toStrictEqual([])
             expect(result.newContents).toBe(originalFileContents)
         })
     })
@@ -235,7 +334,7 @@ describe('The format() function', () => {
         return format(originalFileContents).then(result => {
             expect(result.newContents).toBe(originalFileContents)
             expect(result.changeable).toBe(false)
-            expect(result.errorMessages).toStrictEqual([])
+            expect(result.blockReports).toStrictEqual([])
         })
     })
 
@@ -278,11 +377,17 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(5)
         return format(originalFileContents).then(result => {
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:json')
+            expect(result.blockReports[0].issues[0]).toStrictEqual({
+                fixable: true,
+                message: 'Badly formatted JSON',
+                severity: 2,
+            })
         })
     })
 
@@ -310,27 +415,42 @@ describe('The format() function', () => {
                 '',
             ].join('\n')
 
-            expect.assertions(3)
+            expect.assertions(5)
             return format(originalFileContents).then(result => {
                 expect(result.newContents).toBe(expected)
-                expect(result.errorMessages).toStrictEqual([])
                 expect(result.changeable).toBe(true)
+                expect(result.blockReports.length).toBe(1)
+                expect(result.blockReports[0].blockName).toBe(blockName)
+                expect(result.blockReports[0].issues[0]).toStrictEqual({
+                    fixable: true,
+                    message: 'Badly formatted JSON',
+                    severity: 2,
+                })
             })
         }
     )
 
     it.each(['script:pre-request', 'script:post-response', 'tests'])(
-        'returns an error message when Prettier cannot format %s block',
+        'returns exactly 1 fatal issue for unparsable JavaScript in %s block',
         async blockName => {
             const invalidJs = 'const x = {'
             const originalFileContents = ['', `${blockName} {`, `  ${invalidJs}`, '}', ''].join(
                 '\n'
             )
 
-            expect.assertions(3)
-            return format(originalFileContents).then(result => {
-                expect(result.errorMessages).toHaveLength(1)
-                expect(result.errorMessages[0]).toContain(
+            const mockConsole = {error: jest.fn()}
+            const loadEngineOutcome = await loadESLintEngine(mockConsole, 'recommended')
+            const esLintEngine = loadEngineOutcome.esLintEngine
+
+            expect.assertions(8)
+            return format(originalFileContents, null, {}, esLintEngine).then(result => {
+                expect(result.blockReports).toHaveLength(1)
+                expect(result.blockReports[0].blockName).toBe(blockName)
+                expect(result.blockReports[0].issues.length).toBe(1)
+                expect(result.blockReports[0].issues[0].fatal).toBe(true)
+                expect(result.blockReports[0].issues[0].fixable).toBe(false)
+                expect(result.blockReports[0].issues[0].severity).toBe(2)
+                expect(result.blockReports[0].issues[0].message).toContain(
                     `Prettier could not format ${blockName} because...\nUnexpected token (1:12)`
                 )
                 expect(result.changeable).toBe(false)
@@ -342,10 +462,11 @@ describe('The format() function', () => {
         const invalidJs = 'const x = {'
         const originalFileContents = ['', `body:graphql {`, `  ${invalidJs}`, '}', ''].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(4)
         return format(originalFileContents).then(result => {
-            expect(result.errorMessages).toHaveLength(1)
-            expect(result.errorMessages[0]).toContain(
+            expect(result.blockReports).toHaveLength(1)
+            expect(result.blockReports[0].blockName).toBe('body:graphql')
+            expect(result.blockReports[0].issues[0].message).toContain(
                 `Prettier could not format body:graphql because...\nSyntax Error: Unexpected Name "const". (1:1)`
             )
             expect(result.changeable).toBe(false)
@@ -378,11 +499,19 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(5)
         return format(originalFileContents).then(result => {
             expect(result.newContents).toBe(expected)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.changeable).toBe(true)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:json')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted JSON',
+                    severity: 2,
+                },
+            ])
         })
     })
 
@@ -518,7 +647,7 @@ describe('The format() function', () => {
             return format(correctlyFormattedFileContents).then(result => {
                 expect(result.newContents).toBe(correctlyFormattedFileContents)
                 expect(result.changeable).toBe(false)
-                expect(result.errorMessages).toStrictEqual([])
+                expect(result.blockReports).toStrictEqual([])
             })
         }
     )
@@ -575,11 +704,19 @@ describe('The format() function', () => {
                 '',
             ].join('\n')
 
-            expect.assertions(3)
+            expect.assertions(5)
             return format(badlyFormattedFileContents).then(result => {
                 expect(result.changeable).toBe(true)
-                expect(result.errorMessages).toStrictEqual([])
                 expect(result.newContents).toBe(expected)
+                expect(result.blockReports.length).toBe(1)
+                expect(result.blockReports[0].blockName).toBe(blockName)
+                expect(result.blockReports[0].issues).toStrictEqual([
+                    {
+                        fixable: true,
+                        message: 'Badly formatted JSON',
+                        severity: 2,
+                    },
+                ])
             })
         }
     )
@@ -642,10 +779,19 @@ describe('The format() function', () => {
                 '',
             ].join('\n')
 
-            expect.assertions(3)
+            expect.assertions(6)
             return format(badlyFormattedFileContents).then(result => {
                 expect(result.changeable).toBe(true)
-                expect(result.errorMessages).toStrictEqual([])
+                expect(result.blockReports.length).toBe(1)
+                expect(result.blockReports[0].blockName).toBe(blockName)
+                expect(result.blockReports[0].issues.length).toBe(1)
+                expect(result.blockReports[0].issues).toStrictEqual([
+                    {
+                        fixable: true,
+                        severity: 2,
+                        message: 'Badly formatted JSON',
+                    },
+                ])
                 expect(result.newContents).toBe(expected)
             })
         }
@@ -695,11 +841,19 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(5)
         return format(badlyFormattedFileContents).then(result => {
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:graphql')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted GraphQL',
+                    severity: 2,
+                },
+            ])
         })
     })
 
@@ -744,11 +898,19 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(5)
         return format(badlyFormattedFileContents).then(result => {
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
             expect(result.newContents).toBe(expected)
+            expect(result.blockReports.length).toBe(1)
+            expect(result.blockReports[0].blockName).toBe('body:graphql')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'Badly formatted GraphQL',
+                    severity: 2,
+                },
+            ])
         })
     })
 
@@ -781,7 +943,7 @@ describe('The format() function', () => {
         return format(correctlyFormattedFileContents).then(result => {
             expect(result.newContents).toBe(correctlyFormattedFileContents)
             expect(result.changeable).toBe(false)
-            expect(result.errorMessages).toStrictEqual([])
+            expect(result.blockReports).toStrictEqual([])
         })
     })
 
@@ -900,11 +1062,12 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(4)
         return format(originalFileContents).then(result => {
             expect(result.newContents).toBe(expected)
             expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
+            expect(result.blockReports.length).toEqual(1)
+            expect(result.blockReports[0].blockName).toEqual('body:file')
         })
     })
 
@@ -931,12 +1094,12 @@ describe('The format() function', () => {
         const originalFileContents = [
             '',
             'script:post-response {',
-            '  console.log(res.getHeaders())',
-            '  console.log(acres.getBody().farm)', // This line should not be changed
+            '  bru.setVar("headers", res.getHeaders())',
+            '  bru.setVar("farm", acres.getBody().farm)', // This line should not be changed
             '}',
             '',
             'tests {',
-            '  console.log(req.getBody({raw: true}))', // This line should not be changed
+            '  bru.setVar("rawBody", req.getBody({raw: true}))', // This line should not be changed
             '  expect(res.getStatusText()).to.eql("OK")',
             '  expect(res.getStatus()).to.eql(200)',
             '  expect(res.getBody().name).to.eql("Dave")',
@@ -947,12 +1110,12 @@ describe('The format() function', () => {
         const expected = [
             '',
             'script:post-response {',
-            '  console.log(res.headers)',
-            '  console.log(acres.getBody().farm)',
+            '  bru.setVar("headers", res.headers)',
+            '  bru.setVar("farm", acres.getBody().farm)',
             '}',
             '',
             'tests {',
-            '  console.log(req.getBody({raw: true}))',
+            '  bru.setVar("rawBody", req.getBody({raw: true}))',
             '  expect(res.statusText).to.eql("OK")',
             '  expect(res.status).to.eql(200)',
             '  expect(res.body.name).to.eql("Dave")',
@@ -960,11 +1123,46 @@ describe('The format() function', () => {
             '',
         ].join('\n')
 
-        expect.assertions(3)
+        expect.assertions(6)
         return format(originalFileContents).then(result => {
             expect(result.newContents).toBe(expected)
-            expect(result.changeable).toBe(true)
-            expect(result.errorMessages).toStrictEqual([])
+            expect(result.blockReports.length).toBe(2)
+            expect(result.blockReports[0].blockName).toBe('script:post-response')
+            expect(result.blockReports[0].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'res.getHeaders() used instead of res.headers',
+                    severity: 2,
+                },
+                {
+                    fixable: true,
+                    message: 'Badly formatted JavaScript',
+                    severity: 2,
+                },
+            ])
+            expect(result.blockReports[1].blockName).toBe('tests')
+            expect(result.blockReports[1].issues).toStrictEqual([
+                {
+                    fixable: true,
+                    message: 'res.getBody() used instead of res.body',
+                    severity: 2,
+                },
+                {
+                    fixable: true,
+                    message: 'res.getStatus() used instead of res.status',
+                    severity: 2,
+                },
+                {
+                    fixable: true,
+                    message: 'res.getStatusText() used instead of res.statusText',
+                    severity: 2,
+                },
+                {
+                    fixable: true,
+                    message: 'Badly formatted JavaScript',
+                    severity: 2,
+                },
+            ])
         })
     })
 
@@ -1017,10 +1215,17 @@ describe('The format() function', () => {
 
             const config = {jsonFormatter: 'prettier'}
 
-            expect.assertions(3)
+            expect.assertions(4)
             return format(originalFileContents, null, config).then(result => {
                 expect(result.newContents).toBe(withoutTrailingCommas)
-                expect(result.errorMessages).toStrictEqual([])
+                expect(result.blockReports[0].blockName).toBe(blockName)
+                expect(result.blockReports[0].issues).toStrictEqual([
+                    {
+                        fixable: true,
+                        message: 'Badly formatted JSON',
+                        severity: 2,
+                    },
+                ])
                 expect(result.changeable).toBe(true)
             })
         }
@@ -1032,10 +1237,14 @@ describe('The format() function', () => {
 
         const config = {jsonFormatter: 'prettier'}
 
-        expect.assertions(2)
+        expect.assertions(6)
         return format(originalFileContents, null, config).then(result => {
-            expect(result.errorMessages).toHaveLength(1)
-            expect(result.errorMessages[0]).toContain(
+            expect(result.blockReports).toHaveLength(1)
+            expect(result.blockReports[0].blockName).toBe('body:json')
+            expect(result.blockReports[0].issues).toHaveLength(1)
+            expect(result.blockReports[0].issues[0].fatal).toBe(true)
+            expect(result.blockReports[0].issues[0].fixable).toBe(false)
+            expect(result.blockReports[0].issues[0].message).toContain(
                 'Prettier could not format body:json because...'
             )
         })

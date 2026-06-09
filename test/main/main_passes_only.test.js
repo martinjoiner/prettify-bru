@@ -9,10 +9,17 @@ test('main() passes `only` parameter through to format()', async () => {
     }))
 
     jest.unstable_mockModule('../../lib/format.mjs', () => ({
-        format: jest.fn().mockName('mockformat').mockReturnValue({
+        format: jest.fn().mockName('mockFormat').mockReturnValue({
             newContents: 'New file contents',
             changeable: 1,
-            errorMessages: [],
+            blockReports: [],
+        }),
+    }))
+
+    jest.unstable_mockModule('../../lib/lint.mjs', () => ({
+        loadESLintEngine: jest.fn().mockName('mockLoadESLintEngine').mockReturnValue({
+            esLintEngine: null,
+            fatalError: false,
         }),
     }))
 
@@ -23,6 +30,12 @@ test('main() passes `only` parameter through to format()', async () => {
     const mockConsole = {log: jest.fn()}
 
     return main(mockConsole, '/dir', 'collection', false, 'body:json').then(() => {
-        expect(format).toHaveBeenCalledWith('mock original file contents', 'body:json', {})
+        expect(format).toHaveBeenCalledWith(
+            'mock original file contents',
+            'body:json',
+            {},
+            null,
+            false
+        )
     })
 })

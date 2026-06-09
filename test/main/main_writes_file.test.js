@@ -1,4 +1,5 @@
 import {jest, test, expect} from '@jest/globals'
+import {styleText} from 'node:util'
 
 test('main() writes file when write mode is true', async () => {
     jest.unstable_mockModule('../../lib/files.mjs', () => ({
@@ -17,7 +18,14 @@ test('main() writes file when write mode is true', async () => {
         format: jest.fn().mockName('mockformat').mockReturnValue({
             newContents: 'New file contents',
             changeable: true,
-            errorMessages: [],
+            blockReports: [],
+        }),
+    }))
+
+    jest.unstable_mockModule('../../lib/lint.mjs', () => ({
+        loadESLintEngine: jest.fn().mockName('mockLoadESLintEngine').mockReturnValue({
+            esLintEngine: null,
+            fatalError: false,
         }),
     }))
 
@@ -29,10 +37,15 @@ test('main() writes file when write mode is true', async () => {
 
     return main(mockConsole, '/home', 'bruno-collection', true).then(() => {
         expect(readFile).toHaveBeenCalledTimes(1)
-        expect(format).toHaveBeenCalledWith('mock file contents', null, {})
+        expect(format).toHaveBeenCalledWith('mock file contents', null, {}, null, true)
         expect(writeFile).toHaveBeenCalledWith(
             '/home/bruno-collection/Simple GET Request.bru',
             'New file contents'
+        )
+        expect(mockConsole.log).toHaveBeenNthCalledWith(1, 'Inspected 1 file:')
+        expect(mockConsole.log).toHaveBeenNthCalledWith(
+            2,
+            styleText('green', '  1 file had fixes applied 🪛')
         )
     })
 })
